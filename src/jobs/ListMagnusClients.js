@@ -12,8 +12,13 @@ const log = generateLogger(MAG_LOG_NAME, path.resolve(MAG_LOG_LOCATION), MAG_LOG
 
 module.exports = {
     key: 'ListMagnusClients',
-    async handle({ data }) {
-        console.log(data)
+    async handle(job) {
+
+        console.log('job id: ' + job.id)
+        console.log(job.data)
         console.log('ListMagnusClients called')
+
+        job.log('teste isso é um log')
+        dwadwadwa()
     }
 }

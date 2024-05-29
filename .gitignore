@@ -2,3 +2,6 @@
 logs/*
 docker-logs/*
 src/lib/magnusbilling-node/
+node_modules/
+docker-logs/
+logs/

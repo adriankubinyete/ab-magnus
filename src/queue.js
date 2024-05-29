@@ -1,8 +1,7 @@
 require("dotenv").config();
 const path = require("path");
-const { bullQueues, mqList, absqFind, mqBlock, mqUnblock, mqDisable, mqEnable, dqNotify } = require(path.resolve("src/lib/Queue"));
-const ListMagnusClients = require(path.resolve("src/jobs/ListMagnusClients"));
+const Queue = require(path.resolve("src/lib/Queue"));
 
-mqList.process(ListMagnusClients.handle);
+Queue.process();
 
-mqList.add({ "teste": 'wasd' })
+Queue.add('ListMagnusClients', { "teste": 'wasd' })
