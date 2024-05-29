@@ -1,0 +1,29 @@
+{
+  "name": "autoblockermagnus",
+  "scripts": {
+    "dev:server": "nodemon src/server.js",
+    "dev:queue": "nodemon src/queue.js"
+  },
+  "dependencies": {
+    "@bull-board/api": "^5.17.1",
+    "@bull-board/express": "^5.17.1",
+    "axios": "^1.6.8",
+    "body-parser": "^1.20.2",
+    "bull": "^4.12.4",
+    "co": "^4.6.0",
+    "colors": "^1.4.0",
+    "cors": "^2.8.5",
+    "discord-webhook-node": "^1.1.8",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.2.0",
+    "helmet": "^7.1.0",
+    "node-schedule": "^2.1.1",
+    "nodemon": "^3.1.1",
+    "path": "^0.12.7",
+    "request": "^2.88.2",
+    "uuid": "^9.0.1",
+    "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  }
+}
