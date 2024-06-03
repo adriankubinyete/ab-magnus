@@ -1,9 +1,7 @@
 const path = require("path");
 const express = require('express');
+const Queue = require(path.resolve("src/lib/Queue"));
 const { generateLogger } = require(path.resolve("src/util/logging"));
-// Bull Queue
-const { absqFind } = require(path.resolve("src/bull/queues"));
-
 
 let router = express.Router();
 let LOG_NAME = ""
@@ -16,7 +14,7 @@ router
     .post('/find', async function(req, res){
         const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
 
-        absqFind.add(req.body);
+        Queue.add('SearchContracts', req.body, {priority: 1})
 
         res.status(200).json({'teste': 'teste'});
     })

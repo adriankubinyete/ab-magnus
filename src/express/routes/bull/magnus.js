@@ -1,10 +1,8 @@
 const path = require("path");
 const express = require('express');
+const Queue = require(path.resolve("src/lib/Queue"));
 const { generateLogger } = require( path.resolve("src/util/logging") )
 let router = express.Router();
-// Bull Queue
-const { mqList } = require(path.resolve("src/bull/queues"));
-
 
 let LOG_NAME = ""
 let LOG_LOCATION = "logs/app"
@@ -17,7 +15,8 @@ router
     // Similar ao FORCEUPDATE
     .post('/list', async function(req, res){
         const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
-        mqList.add({}, {priority: 1})
+        Queue.add('ListMagnusClients', {}, {priority: 1})
+        // mqList.add({}, {priority: 1})
         res.status(200).json({status: 'test'});
     })
 

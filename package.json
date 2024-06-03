@@ -1,9 +1,21 @@
 {
   "name": "autoblockermagnus",
   "scripts": {
-    "dev": "npm-run-all -p dev:*",
-    "dev:server": "nodemon src/server.js",
-    "dev:queue": "nodemon src/queue.js"
+
+    "dev:windows": "npm-run-all -p win:dev:*",
+    "win:dev:server": "nodemon --legacy-watch src/server.js",
+    "win:dev:queue": "nodemon --legacy-watch src/queue.js",
+    "w:d:s": "nodemon --legacy-watch src/server.js",
+    "w:d:q": "nodemon --legacy-watch src/queue.js",
+
+    "dev:linux": "npm-run-all -p linux:dev:*",
+    "linux:dev:server": "nodemon src/server.js",
+    "linux:dev:queue": "nodemon src/queue.js",
+    "linux:d:s": "nodemon src/server.js",
+    "linux:d:q": "nodemon src/queue.js",
+
+    "d:s": "nodemon --legacy-watch src/server.js",
+    "d:q": "nodemon --legacy-watch src/queue.js"
   },
   "dependencies": {
     "@bull-board/api": "^5.17.1",
