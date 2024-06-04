@@ -10,7 +10,7 @@ let MAG_LOG_FILE_ROTATE = "30d"
 
 module.exports = {
     key: 'ListMagnusClients',
-    async handle(job, Queue) {
+    async handle(job, done, Queue) {
         const log = generateLogger(`${MAG_LOG_NAME}:${job.id}`, path.resolve(MAG_LOG_LOCATION), MAG_LOG_LEVEL, MAG_LOG_FILE_LEVEL, MAG_LOG_FILE_ROTATE);
 
         let mb = getMagnusBillingClient();
@@ -101,7 +101,7 @@ module.exports = {
             log.test(`hc:Total = ${Object.keys(hasContract).length - 3}`);
             log.test(`Fhc:Total = ${Object.keys(filteredHasContract).length}`);
 
-            return({
+            done(null, {
                 hasContract: {
                     total: Object.keys(hasContract).length - 3,
                     active: Object.keys(hasContract.isActive).length,

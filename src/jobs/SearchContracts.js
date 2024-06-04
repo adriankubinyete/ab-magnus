@@ -10,7 +10,7 @@ let ABS_LOG_FILE_ROTATE = "30d"
 
 module.exports = {
     key: 'SearchContracts',
-    async handle(job, Queue) {
+    async handle(job, done, Queue) {
         const log = generateLogger(`${ABS_LOG_NAME}:${job.id}`, path.resolve(ABS_LOG_LOCATION), ABS_LOG_LEVEL, ABS_LOG_FILE_LEVEL, ABS_LOG_FILE_ROTATE);
         log.debug("Starting job...");
 
@@ -181,6 +181,6 @@ module.exports = {
         log.info(`Erros: ${ERRORS.length}`); job.log(`Erros: ${ERRORS.length}`);
         if (ERRORS.length > 0) {log.error(JSON.stringify(ERRORS))};
 
-        return;
+        done(null, {});
     }
 }

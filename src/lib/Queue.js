@@ -24,10 +24,13 @@ module.exports = {
     },
     process() {
         return this.queues.forEach(queue => {
-            queue.bull.process(async (job) => {
-                await queue.handle(job, this); // Passa 'queues' como segundo argumento
+            queue.bull.process(async (job, done) => {
+                try {
+                    await queue.handle(job, done, this); // Passa 'queues' como segundo argumento
+                } catch (error) {
+                    done(error); // pro bull nao explodir meu worker quando der erro dentro do queue.handle
+                }
             });
-            // queue.bull.process(queue.handle)
 
             queue.bull.on('failed', (job, err) => {
                 console.log('Job failed', job.name, job.data);
