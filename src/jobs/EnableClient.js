@@ -1,6 +1,6 @@
 module.exports = {
     key: 'EnableClient',
-    async handle(job, Queue) {
+    async handle(job, done, Queue) {
 
     }
 }

@@ -1,6 +1,6 @@
 module.exports = {
     key: 'DisableClient',
-    async handle(job, Queue) {
+    async handle(job, done, Queue) {
 
     }
 }

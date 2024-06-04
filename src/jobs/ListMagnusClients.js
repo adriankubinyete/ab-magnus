@@ -98,8 +98,8 @@ module.exports = {
             const { isActive, isInactive, isBlocked, ...filteredHasContract } = hasContract;
             Queue.add('SearchContracts', {...filteredHasContract});
 
-            log.test(`hc:Total = ${Object.keys(hasContract).length - 3}`);
-            log.test(`Fhc:Total = ${Object.keys(filteredHasContract).length}`);
+            log.unit(`hc:Total = ${Object.keys(hasContract).length - 3}`);
+            log.unit(`Fhc:Total = ${Object.keys(filteredHasContract).length}`);
 
             done(null, {
                 hasContract: {

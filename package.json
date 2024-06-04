@@ -1,5 +1,5 @@
 {
-  "name": "autoblockermagnus",
+  "name": "autoblockermagnus", 
   "scripts": {
 
     "dev:windows": "npm-run-all -p win:dev:*",
