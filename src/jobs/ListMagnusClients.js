@@ -8,11 +8,10 @@ let MAG_LOG_LEVEL = 10
 let MAG_LOG_FILE_LEVEL = 10
 let MAG_LOG_FILE_ROTATE = "30d"
 
-const log = generateLogger(MAG_LOG_NAME, path.resolve(MAG_LOG_LOCATION), MAG_LOG_LEVEL, MAG_LOG_FILE_LEVEL, MAG_LOG_FILE_ROTATE);
-
 module.exports = {
     key: 'ListMagnusClients',
     async handle(job, Queue) {
+        const log = generateLogger(`${MAG_LOG_NAME}:${job.id}`, path.resolve(MAG_LOG_LOCATION), MAG_LOG_LEVEL, MAG_LOG_FILE_LEVEL, MAG_LOG_FILE_ROTATE);
 
         let mb = getMagnusBillingClient();
         let result = await mb.clients.users.list({limit: 9999});
@@ -96,9 +95,11 @@ module.exports = {
     
             // Já que terminamos de listar os clientes, vou passar esses dados pra fazer consulta no IXC. é um trabalho novo.
             // console.log(`DRY: absqFind.add(${hasContract}, ${doesntHaveContract})`)
-            console.log('------------------test---------------------------')
-            console.log(Queue)
-            Queue.add('SearchContracts', {hasContract, doesntHaveContract});
+            const { isActive, isInactive, isBlocked, ...filteredHasContract } = hasContract;
+            Queue.add('SearchContracts', {...filteredHasContract});
+
+            log.test(`hc:Total = ${Object.keys(hasContract).length - 3}`);
+            log.test(`Fhc:Total = ${Object.keys(filteredHasContract).length}`);
 
             return({
                 hasContract: {

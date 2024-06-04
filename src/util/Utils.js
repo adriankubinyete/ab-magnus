@@ -1,6 +1,8 @@
 const path = require("path");
+const axios = require("axios");
 const { createHash } = require("crypto");
 const { MagnusBilling } = require( path.resolve("src/lib/magnusbilling-node/index") );
+const { generateLogger } = require(path.resolve("src/util/logging"));
 
 function getMagnusBillingClient() {
     let MAGNUSBILLING_URL=`${process.env.MAGNUSBILLING_PROTOCOL}://${process.env.MAGNUSBILLING_HOST}:${process.env.MAGNUSBILLING_PORT}/mbilling`
@@ -22,12 +24,18 @@ function sha256(x, y = {digest: hex}) {
 // TODO:
 // Organizar isso aqui em outro local?
 async function obtainNewJWT() {
+    let LOG_NAME = "obtainNewJWT"
+    let LOG_LOCATION = "logs/app"
+    let LOG_LEVEL = 10
+    let LOG_FILE_LEVEL = 10
+    let LOG_FILE_ROTATE = "30d"
+    const log = generateLogger(LOG_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
 
     // Requisitando o JWT
     let JWT_AUTH_ENDPOINT = '/auth'
     let JWT_REQ = {
         method: 'post',
-        url: AUTOBLOCKERSERVER_URL + JWT_AUTH_ENDPOINT,
+        url: `${process.env.AUTOBLOCKERSERVER_PROTOCOL}://${process.env.AUTOBLOCKERSERVER_HOST}:${process.env.AUTOBLOCKERSERVER_PORT}` + JWT_AUTH_ENDPOINT,
         data: {
             "user": process.env.AUTOBLOCKERSERVER_USER,
             "password": process.env.AUTOBLOCKERSERVER_PASSWORD,
@@ -52,6 +60,12 @@ async function obtainNewJWT() {
 // TODO:
 // Organizar isso aqui em outro local?
 async function sendRequestABS(AXIOS_REQUEST_PARAMS, isJwtRetry = false) {
+    let LOG_NAME = "sendRequestABS"
+    let LOG_LOCATION = "logs/app"
+    let LOG_LEVEL = 10
+    let LOG_FILE_LEVEL = 10
+    let LOG_FILE_ROTATE = "30d"
+    const log = generateLogger(LOG_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
 
     // Verificando se é necessário gerar um JWT novo
     if (!process.env.JSON_WEB_TOKEN | isJwtRetry) { await obtainNewJWT() }

@@ -18,6 +18,10 @@ module.exports = {
         const queue = this.queues.find(queue => queue.name === name);
         return queue.bull.add(data, config);
     },
+    obliterate(name, config = null) {
+        const queue = this.queues.find(queue => queue.name === name);
+        return queue.bull.obliterate(config);
+    },
     process() {
         return this.queues.forEach(queue => {
             queue.bull.process(async (job) => {

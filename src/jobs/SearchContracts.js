@@ -1,6 +1,6 @@
 const path = require("path");
 const { generateLogger } = require(path.resolve("src/util/logging"))
-const { sendRequestABS } = require(path.resolve("src/util/Utils"))
+const { sha256, sendRequestABS } = require(path.resolve("src/util/Utils"))
 
 let ABS_LOG_NAME = "p:SearchContract"
 let ABS_LOG_LOCATION = "logs/app"
@@ -11,8 +11,8 @@ let ABS_LOG_FILE_ROTATE = "30d"
 module.exports = {
     key: 'SearchContracts',
     async handle(job, Queue) {
-        const qlog = generateLogger(`FIND:${job.id}`, path.resolve(__dirname, ABS_LOG_LOCATION), ABS_LOG_LEVEL, ABS_LOG_FILE_LEVEL, ABS_LOG_FILE_ROTATE);
-        qlog.debug("Starting job...");
+        const log = generateLogger(`${ABS_LOG_NAME}:${job.id}`, path.resolve(ABS_LOG_LOCATION), ABS_LOG_LEVEL, ABS_LOG_FILE_LEVEL, ABS_LOG_FILE_ROTATE);
+        log.debug("Starting job...");
 
         const STATUS_ACTIVE = [1];
         const STATUS_INACTIVE = [0];
@@ -53,7 +53,7 @@ module.exports = {
             let newMagnusStatus;
             
             function reportClientError(msg) {
-                qlog.error(msg);
+                log.error(msg);
                 ERRORS.push({
                     "cliente": nome,
                     "usuario": usuario,
@@ -66,10 +66,11 @@ module.exports = {
             async function searchClientInIxc(contract) {
 
                 // Fazendo a requisição no IXC
-                qlog.info('Pesquisando contrato ' + contract)
+                log.info('Pesquisando contrato ' + contract)
+                let CHECK_CONTRACT_ENDPOINT = '/contract/check';
                 let response = await sendRequestABS({
                     method: 'POST',
-                    url: `${process.env.AUTOBLOCKERSERVER_URL}/contract/check`,
+                    url: `${process.env.AUTOBLOCKERSERVER_PROTOCOL}://${process.env.AUTOBLOCKERSERVER_HOST}:${process.env.AUTOBLOCKERSERVER_PORT}${CHECK_CONTRACT_ENDPOINT}`,
                     data: {
                         contract: sha256(`${process.env.AUTOBLOCKERSERVER_SALT}${contract}`, { digest: 'hex' })
                     }
@@ -113,7 +114,7 @@ module.exports = {
 
                 if (action) { logMessage = action }
 
-                qlog.debug(`${logPrefix}: ${action}`)
+                log.debug(`${logPrefix}: ${action}`)
                 
                 return action;
             }
@@ -123,13 +124,13 @@ module.exports = {
 
             newMagnusStatus = IXC_STATUS_MAPPING[ixc.contract.status_contrato];
             if (newMagnusStatus.includes(statusMagnus)) { 
-                qlog.trace("Status atual e novo são iguais. Ignorando.");
+                log.trace("Status atual e novo são iguais. Ignorando.");
                 NO_CHANGE.push({ "cliente": nome, "usuario": usuario, }); 
                 return; 
             };
 
             let action = getAction(statusMagnus, newMagnusStatus[0]);
-            if (!action) { qlog.error(`FAIL! //  Nome: ${nome} // ${statusMagnus} -> ${newMagnusStatus[0]}`); return; };
+            if (!action) { log.error(`FAIL! //  Nome: ${nome} // ${statusMagnus} -> ${newMagnusStatus[0]}`); return; };
 
             jobPayloads[action].push({ 
                 nome: nome, 
@@ -142,9 +143,21 @@ module.exports = {
         }
 
         // Processando cada cliente recebido
-        for (const [key, data] of Object.entries(job.data.hasContract)) {
+        // Estou assumindo que a estrutura que chega até mim é:
+        // "usuario:string" : {
+        //     "nome": nome:string,
+        //     "usuario": usuario:string,
+        //     "contrato": contrato:string,
+        //     "status": status:integer // Refere-se ao status atual no MAGNUS. Usado pra descobrir se será um BLOQUEIO, DESBLOQUEIO, ATIVAÇÃO ou DESATIVAÇÃO
+        //     "tags": tags:list // Opcional, lista de tags especiais, como "overwrite", "dry", etc. (NÃO IMPLEMENTADO)
+        // }
+        // Pra cada usuário, só acrescentar outro no final.
+        for (const [key, data] of Object.entries(job.data)) {
             // Condição de guarda para as chaves 'ajudantes' que devem ser ignoradas
-            if (['isActive', 'isInactive', 'isBlocked'].includes(key)) { continue };
+            if (['isActive', 'isInactive', 'isBlocked'].includes(key)) { 
+                log.test(`${key} está presente!`);
+                continue;
+             };
             await processClient(key, data, jobsToSend)
         }
 

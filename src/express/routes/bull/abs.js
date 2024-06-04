@@ -18,5 +18,13 @@ router
 
         res.status(200).json({'teste': 'teste'});
     })
+    
+    .post('/find/obliterate', async function(req, res){
+        const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
+
+        Queue.add('SearchContracts', req.body, {priority: 1})
+
+        res.status(200).json({'teste': 'teste'});
+    })
  
 module.exports = router;
