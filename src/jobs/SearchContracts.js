@@ -167,10 +167,10 @@ module.exports = {
         if (jobsToSend.disable.length > 0) {log.trace(JSON.stringify(jobsToSend.disable))};
 
         log.info(`Ativações: ${jobsToSend.enable.length}`); job.log(`Ativações: ${jobsToSend.enable.length}`);
-        if (jobsToSend.enable.length > 0) {log.trace(JSON.stringify(jobsToSend.enable))};
+        if (jobsToSend.enable.length > 0) {log.trace(JSON.stringify(jobsToSend.enable)); Queue.add('EnableClient', jobsToSend.enable)};
 
         log.info(`Bloqueios: ${jobsToSend.block.length}`); job.log(`Bloqueios: ${jobsToSend.block.length}`);
-        if (jobsToSend.block.length > 0) {log.trace(JSON.stringify(jobsToSend.block))};
+        if (jobsToSend.block.length > 0) {log.trace(JSON.stringify(jobsToSend.block)); Queue.add('BlockClient', jobsToSend.block)};
         
         log.info(`Desbloqueios: ${jobsToSend.unblock.length}`); job.log(`Desbloqueios: ${jobsToSend.unblock.length}`);
         if (jobsToSend.unblock.length > 0) {log.trace(JSON.stringify(jobsToSend.unblock))};

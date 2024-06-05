@@ -11,7 +11,7 @@ let LOG_FILE_ROTATE = "30d"
 module.exports = {
     key: 'BlockClient',
     async handle(job, done, Queue) {
-        const log = generateLogger(`${MAG_LOG_NAME}:${job.id}`, path.resolve(MAG_LOG_LOCATION), MAG_LOG_LEVEL, MAG_LOG_FILE_LEVEL, MAG_LOG_FILE_ROTATE);
+        const log = generateLogger(`${LOG_NAME}:${job.id}`, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE);
 
         let mb = getMagnusBillingClient();
 
