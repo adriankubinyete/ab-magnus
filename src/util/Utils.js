@@ -21,6 +21,19 @@ function sha256(x, y = {digest: hex}) {
     }
 }
 
+// Formatar a mensagem do discord
+function formatDiscordMessage(template, data) {
+    return template.replace(/\\?%\w+%/g, (match) => {
+        if (match.startsWith('\\')) {
+            // Remove a barra invertida e retorna o caractere %
+            return match.slice(1);
+        }
+
+        const key = match.slice(1, -1); // Remove % do início e do final
+        return data[key] || match;
+    });
+}
+
 // TODO:
 // Organizar isso aqui em outro local?
 async function obtainNewJWT() {
