@@ -22,7 +22,15 @@ function sha256(x, y = {digest: hex}) {
 }
 
 // Formatar a mensagem do discord
+// formatDiscordMessage(msg, {fake_var: replaced_var...})
 function formatDiscordMessage(template, data) {
+    let LOG_NAME = "formatDiscordMessage"
+    let LOG_LOCATION = "logs/app"
+    let LOG_LEVEL = 10
+    let LOG_FILE_LEVEL = 10
+    let LOG_FILE_ROTATE = "30d"
+    const log = generateLogger(LOG_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
+    
     return template.replace(/\\?%\w+%/g, (match) => {
         if (match.startsWith('\\')) {
             // Remove a barra invertida e retorna o caractere %
@@ -30,7 +38,14 @@ function formatDiscordMessage(template, data) {
         }
 
         const key = match.slice(1, -1); // Remove % do início e do final
-        return data[key] || match;
+        log.unit(`O valor mapeado para ${match} é "${data[key]}" (${typeof(data[key])}).`)
+        if (data[key] !== undefined) { 
+            log.trace(`${match} : Substituição efetuada: "${data[key]}"`)
+            return data[key] 
+        } else { 
+            log.warn(`${match} : Variável de substituição não-mapeada, ou com valor indefinido.`)
+            return match 
+        }
     });
 }
 
@@ -121,5 +136,6 @@ module.exports = {
     getMagnusBillingClient,
     sha256,
     obtainNewJWT,
-    sendRequestABS
+    sendRequestABS,
+    formatDiscordMessage
 }

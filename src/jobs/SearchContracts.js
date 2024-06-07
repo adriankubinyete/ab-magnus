@@ -46,6 +46,14 @@ module.exports = {
         function isInactive(cs) { return STATUS_INACTIVE.includes(cs) };
         function isBlocked(cs) { return STATUS_BLOCK.includes(cs) };
 
+        function keyShouldBeIgnored(key) {
+            KEYS_TO_IGNORE = ['originator']
+            if (KEYS_TO_IGNORE.includes(key)) { 
+                return true;
+            };
+            return false;
+        }
+
         async function processClient(usuario, cliente, jobPayloads) {
             let statusMagnus = parseInt(cliente.status);
             let nome = cliente.nome;
@@ -144,6 +152,14 @@ module.exports = {
 
         // Processando cada cliente recebido
         // Estou assumindo que a estrutura que chega até mim é:
+        let data = {
+            originator: "",
+            tags: "",
+            users: [
+                {nome: 'w', usuario: 'x'},
+                {nome: 'y', usuario: 'z'},
+            ]
+        }
         // "usuario:string" : {
         //     "nome": nome:string,
         //     "usuario": usuario:string,
@@ -153,12 +169,9 @@ module.exports = {
         // }
         // Pra cada usuário, só acrescentar outro no final.
         for (const [key, data] of Object.entries(job.data)) {
-            // Condição de guarda para as chaves 'ajudantes' que devem ser ignoradas
-            if (['isActive', 'isInactive', 'isBlocked'].includes(key)) { 
-                log.test(`${key} está presente!`);
-                continue;
-             };
-            await processClient(key, data, jobsToSend)
+            if (!keyShouldBeIgnored(key)) {
+                await processClient(key, data, jobsToSend)
+            }
         }
 
         log.info(`Processamento finalizado.`)

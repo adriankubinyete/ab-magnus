@@ -11,7 +11,8 @@ let MAG_LOG_FILE_ROTATE = "30d"
 module.exports = {
     key: 'ListMagnusClients',
     async handle(job, done, Queue) {
-        const log = generateLogger(`${MAG_LOG_NAME}:${job.id}`, path.resolve(MAG_LOG_LOCATION), MAG_LOG_LEVEL, MAG_LOG_FILE_LEVEL, MAG_LOG_FILE_ROTATE);
+        const JOB_NAME = `${MAG_LOG_NAME}:${job.id}`;
+        const log = generateLogger(JOB_NAME, path.resolve(MAG_LOG_LOCATION), MAG_LOG_LEVEL, MAG_LOG_FILE_LEVEL, MAG_LOG_FILE_ROTATE);
 
         let mb = getMagnusBillingClient();
         let result = await mb.clients.users.list({limit: 9999});
@@ -40,6 +41,7 @@ module.exports = {
                 nome: client.lastname,
                 usuario: client.username,
                 contrato: client.dist,
+                doc: client.doc,
                 status: parseInt(client.active), // 0:inativo | 1:ativo | 2:pendente | 3:bloqueado entrada | 4:bloqueado entrada e saida
                 // cpfcnpj: client.cpf_cnpj,
             }          
@@ -96,10 +98,14 @@ module.exports = {
             // Já que terminamos de listar os clientes, vou passar esses dados pra fazer consulta no IXC. é um trabalho novo.
             // console.log(`DRY: absqFind.add(${hasContract}, ${doesntHaveContract})`)
             const { isActive, isInactive, isBlocked, ...filteredHasContract } = hasContract;
-            Queue.add('SearchContracts', {...filteredHasContract});
+            Queue.add('SearchContracts', {
+                originator: JOB_NAME,
+                tags: "",
+                users: {...filteredHasContract},
+            } );
 
-            log.unit(`hc:Total = ${Object.keys(hasContract).length - 3}`);
-            log.unit(`Fhc:Total = ${Object.keys(filteredHasContract).length}`);
+            log.trace(`hc:Total = ${Object.keys(hasContract).length - 3}`);
+            log.trace(`Fhc:Total = ${Object.keys(filteredHasContract).length}`);
 
             done(null, {
                 hasContract: {

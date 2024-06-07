@@ -3,6 +3,8 @@
   "scripts": {
 
     "dev:windows": "npm-run-all -p win:dev:*",
+    "d:w": "npm-run-all -p win:dev:*",
+
     "win:dev:server": "nodemon --legacy-watch src/server.js",
     "win:dev:queue": "nodemon --legacy-watch src/queue.js",
     "w:d:s": "nodemon --legacy-watch src/server.js",

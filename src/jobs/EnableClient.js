@@ -11,7 +11,8 @@ let LOG_FILE_ROTATE = "30d"
 module.exports = {
     key: 'EnableClient',
     async handle(job, done, Queue) {
-        const log = generateLogger(`${LOG_NAME}:${job.id}`, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE);
+        const JOB_NAME = `${LOG_NAME}:${job.id}`
+        const log = generateLogger(JOB_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE);
 
         let mb = getMagnusBillingClient();
         
@@ -38,6 +39,7 @@ module.exports = {
             })
 
             if (ret && ret.success == true) {
+                log.trace(`EditUserStatus return: ${JSON.stringify(ret)}`)
                 return true
             } else { 
                 log.error("Alguma coisa aconteceu, não foi possível editar o status do usuário")
@@ -60,6 +62,7 @@ module.exports = {
                 throw error;
             }
 
+            Queue.add('DiscordMessage', client)
             // mandar msg no discord
         }
 

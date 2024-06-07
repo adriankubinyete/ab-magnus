@@ -4,7 +4,7 @@ const redisConfig = require(path.resolve("src/config/redis"));
 const jobs = require(path.resolve("src/jobs"));
 
 const queues = Object.values(jobs).map(job => ({
-    bull: new Bull(job.key, {redis: redisConfig}),
+    bull: new Bull(job.key, { redis: redisConfig, ...(job.config || {}) }),
     name: job.key,
     handle: job.handle
 }))

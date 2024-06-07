@@ -10,6 +10,7 @@ let LOG_FILE_ROTATE = "30d"
 
 module.exports = {
     key: 'BlockClient',
+    config: {},
     async handle(job, done, Queue) {
         const log = generateLogger(`${LOG_NAME}:${job.id}`, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE);
 
