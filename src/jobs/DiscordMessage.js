@@ -63,7 +63,7 @@ function getMessageForAction(job) {
     let preset = embedTemplate[job.data.action];
     return new MessageBuilder()
     .setTitle(preset.title) // bizzaro mas funciona :D
-    .setColor(preset.color)
+    .setColor(preset.hexColor)
     .setURL(preset.url)
     .setThumbnail(preset.thumbnail)
     .setDescription(formatDiscordMessage(process.env.DISCORD_REPORT_MESSAGE, job.data))
