@@ -23,7 +23,7 @@ function sha256(x, y = {digest: hex}) {
 
 // Formatar a mensagem do discord
 // formatDiscordMessage(msg, {fake_var: replaced_var...})
-function formatDiscordMessage(template, data) {
+function formatDiscordMessage(message, varMapping) {
     let LOG_NAME = "formatDiscordMessage"
     let LOG_LOCATION = "logs/app"
     let LOG_LEVEL = 10
@@ -31,17 +31,17 @@ function formatDiscordMessage(template, data) {
     let LOG_FILE_ROTATE = "30d"
     const log = generateLogger(LOG_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
     
-    return template.replace(/\\?%\w+%/g, (match) => {
+    return message.replace(/\\?%\w+%/g, (match) => {
         if (match.startsWith('\\')) {
             // Remove a barra invertida e retorna o caractere %
             return match.slice(1);
         }
 
         const key = match.slice(1, -1); // Remove % do início e do final
-        log.unit(`O valor mapeado para ${match} é "${data[key]}" (${typeof(data[key])}).`)
-        if (data[key] !== undefined) { 
-            log.trace(`${match} : Substituição efetuada: "${data[key]}"`)
-            return data[key] 
+        log.unit(`O valor mapeado para ${match} é "${varMapping[key]}" (${typeof(varMapping[key])}).`)
+        if (varMapping[key] !== undefined) { 
+            log.trace(`${match} : Substituição efetuada: "${varMapping[key]}"`)
+            return varMapping[key] 
         } else { 
             log.warn(`${match} : Variável de substituição não-mapeada, ou com valor indefinido.`)
             return match 
