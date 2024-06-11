@@ -13,6 +13,7 @@ module.exports = {
     async handle(job, done, Queue) {
         const JOB_NAME = `${LOG_NAME}:${job.id}`
         const log = generateLogger(JOB_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE);
+        let _DRY = true
 
         let mb = getMagnusBillingClient();
         
@@ -32,9 +33,14 @@ module.exports = {
 
         }
 
-        async function mbEditUserStatus(id, newStatus) {
+        async function mbEditUserStatus(userId, newStatus) {
+            if (_DRY) {
+                log.debug(`DRY: EditUserStatus`)
+                return true
+            }
+            
             let ret = await mb.clients.users.edit({
-                id: id,
+                id: userId,
                 active: newStatus
             })
 

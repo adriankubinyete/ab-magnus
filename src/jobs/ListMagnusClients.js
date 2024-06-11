@@ -11,8 +11,8 @@ let MAG_LOG_FILE_ROTATE = "30d"
 module.exports = {
     key: 'ListMagnusClients',
     async handle(job, done, Queue) {
-        const JOB_NAME = `${MAG_LOG_NAME}:${job.id}`;
-        const log = generateLogger(JOB_NAME, path.resolve(MAG_LOG_LOCATION), MAG_LOG_LEVEL, MAG_LOG_FILE_LEVEL, MAG_LOG_FILE_ROTATE);
+        job.data._JOB_IID = `${MAG_LOG_NAME}:${job.id}`;
+        const log = generateLogger(job.data._JOB_IID, path.resolve(MAG_LOG_LOCATION), MAG_LOG_LEVEL, MAG_LOG_FILE_LEVEL, MAG_LOG_FILE_ROTATE);
 
         let mb = getMagnusBillingClient();
         let result = await mb.clients.users.list({limit: 9999});
@@ -99,13 +99,9 @@ module.exports = {
             // console.log(`DRY: absqFind.add(${hasContract}, ${doesntHaveContract})`)
             const { isActive, isInactive, isBlocked, ...filteredHasContract } = hasContract;
             Queue.add('SearchContracts', {
-                originator: JOB_NAME,
-                tags: "",
+                tags: {originator: job.data._JOB_IID},
                 users: {...filteredHasContract},
             } );
-
-            log.trace(`hc:Total = ${Object.keys(hasContract).length - 3}`);
-            log.trace(`Fhc:Total = ${Object.keys(filteredHasContract).length}`);
 
             done(null, {
                 hasContract: {
