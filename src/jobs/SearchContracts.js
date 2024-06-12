@@ -108,12 +108,21 @@ class ClientProcessor {
     async processClient(cliente) {
         this.log.unit('Client data: ' + JSON.stringify(cliente));
         try {
+            // Obtendo as informações desse contrato no ABS
             const ixc = await this.findClientViaContractInABS(cliente.contrato);
+
+            // Usando as informações obtidas pra comparar o status antigo com o atual, e decidir uma ação
             const executeAction = await this.getAction(cliente.status, this.IXC_TO_MAGNUS[ixc.contract.status_contrato][0]);
-            executeAction(cliente) // isso vai executar unblock/block/disable/enable/nochange
+            
+            // Executando a ação de fato
+            executeAction(cliente)
+
+            // Ações:
+            // Block / Unblock / Disable / Enable -> Criam jobs em outras filas
+            // NoChange -> Não faz nada
         } catch (error) {
             console.log('UM ERRO OCORREU: ' + error.stack)
-            this.executeNotifyError(cliente)
+            this.executeNotifyError(cliente) // Deve enviar uma mensagem explicando o que houve.
             // se não conseguiu mapear uma ação, falha
             // deve reportar o erro pra fila
         }
