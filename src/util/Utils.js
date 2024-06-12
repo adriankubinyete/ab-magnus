@@ -113,7 +113,8 @@ async function sendRequestABS(AXIOS_REQUEST_PARAMS, isJwtRetry = false) {
     try {
         res = await axios.request(AXIOS_REQUEST_PARAMS)
     } catch (err) {
-
+        console.log('deu erro enviando a req pro abs')
+        console.log(err)
         // Analisando o erro: se for por causa de JWT
         if (err.response.status === 401) {
             log.warn(`[${err.response.status}] [${err.response.statusText}] Requisição falhou, aparentemente por JWT Inválido.`)
