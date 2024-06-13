@@ -17,31 +17,31 @@ router
         const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
         Queue.add('ListMagnusClients', {}, {priority: 1})
         // mqList.add({}, {priority: 1})
-        res.status(200).json({status: 'test'});
+        res.status(200).json(req.body);
     })
 
     .get('/block', async function(req, res){
         const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
         log.info('teste block')
-        res.status(200).json({status: 'test'});
+        res.status(200).json(req.body);
     })
 
     .get('/unblock', async function(req, res){
         const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
         log.info('teste unblock')
-        res.status(200).json({status: 'test'});
+        res.status(200).json(req.body);
     })
     
     .get('/disable', async function(req, res){
         const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
         log.info('teste disable')
-        res.status(200).json({status: 'test'});
+        res.status(200).json(req.body);
     })
 
     .get('/enable', async function(req, res){
         const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
         log.info('teste enable')
-        res.status(200).json({status: 'test'});
+        res.status(200).json(req.body);
     })
 
  

@@ -3,17 +3,14 @@ const { generateLogger } = require(path.resolve("src/util/logging"))
 const { sha256, sendRequestABS } = require(path.resolve("src/util/Utils"))
 
 class ClientProcessor {
-    constructor(log) {
-
-        // Preparando o que será retornado ao processar os clientes.
-        this.output = {
-            block: {},
-            unblock: {},
-            disable: {},
-            enable: {},
-            debug: {},
-            error: {},
-        };
+    constructor(log, queue, tags = {}) {
+        this.Queue = queue;
+        this.log = log;
+        this.tags = {
+            DRY: tags.DRY ?? false,
+            DONT_LOG_ABOUT_REQUESTS: tags.DONT_LOG_ABOUT_REQUESTS ?? true,
+            FINAL_REPORT_VERBOSELY: tags.FINAL_REPORT_VERBOSELY ?? false,
+        }
 
         // O que cada ID significa no Magnus.
         this.STATUS_ACTIVE = [1];
@@ -35,33 +32,102 @@ class ClientProcessor {
             'A': this.STATUS_ACTIVE
         };
 
-        this.log = log;
+        // Quais os trabalhos à serem feitos.
+        this.JOBS = {
+            toDisable: [],
+            toEnable: [],
+            toBlock: [],
+            toUnblock: [],
+            noChange: [],
+            errors: []
+        }
 
     }
 
-    async executeNotifyError(cliente) {
-        console.log('Execute Notify Error')
+    executeNotifyError(data) {
+        this.JOBS.errors.push(data);
+        if (this.tags.DRY) {
+            this.log.unit(`DRY: NotifyError (${data.nome})`);
+            return this;
+        }
 
+        this.Queue.add('', data)
+        return this;
     }
 
-    async executeNoChange(cliente) {
-    console.log('Execute No Change')
+    executeNoChange(data) {
+        this.JOBS.noChange.push(data);
+        if (this.tags.DRY) {
+            this.log.unit(`DRY: NoChange (${data.nome})`);
+            return this;
+        }
+
+        this.Queue.add('', data)
+        return this;
     }
 
-    async executeBlock(cliente) {
-    console.log('Execute Block')
+    executeBlock(data) {
+        this.JOBS.toBlock.push(data);
+        if (this.tags.DRY) {
+            this.log.unit(`DRY: Block (${data.nome})`);
+            return this;
+        }
+
+        this.Queue.add('', data)
+        return this;
     }
 
-    async executeUnblock(cliente) {
-      console.log('Execute Unblock')  
+    executeUnblock(data) {
+        this.JOBS.toUnblock.push(data);
+        if (this.tags.DRY) {
+            this.log.unit(`DRY: Unblock (${data.nome});`) 
+            return this;
+        }
+
+        this.Queue.add('', data)
+        return this;
     }
 
-    async executeEnable(cliente) {
-      console.log('Execute Enable')  
+    executeEnable(data) {
+        this.JOBS.toEnable.push(data);
+        if (this.tags.DRY) {
+            this.log.unit(`DRY: Enable (${data.nome})`);
+            return this;
+        }
+
+        this.Queue.add('', data)
+        return this;
     }
 
-    async executeDisable(cliente) {
-       console.log('Execute Disable') 
+    executeDisable(data) {
+        this.JOBS.toDisable.push(data);
+        if (this.tags.DRY) {
+            this.log.unit(`DRY: Disable (${data.nome})`);
+            return this;
+        }
+
+        this.Queue.add('', data)
+        return this;
+    }
+
+    getReport(mode = null) {
+
+        if (this.tags.FINAL_REPORT_VERBOSELY) { 
+            return {
+                total: (this.JOBS.toDisable.length + this.JOBS.toEnable.length + this.JOBS.toBlock.length + this.JOBS.toUnblock.length + this.JOBS.noChange.length + this.JOBS.errors.length), 
+                ...this.JOBS
+            }
+        }
+
+        return {
+            total: (this.JOBS.toDisable.length + this.JOBS.toEnable.length + this.JOBS.toBlock.length + this.JOBS.toUnblock.length + this.JOBS.noChange.length + this.JOBS.errors.length),
+            toDisable: this.JOBS.toDisable.length,
+            toEnable: this.JOBS.toEnable.length,
+            toBlock: this.JOBS.toBlock.length,
+            toUnblock: this.JOBS.toUnblock.length,
+            noChange: this.JOBS.noChange.length,
+            errors: this.JOBS.errors.length,        
+        }
     }
 
     // Utilitário: encontra o cliente no IXCBS utilizando um contrato.
@@ -74,48 +140,53 @@ class ClientProcessor {
             url: REQUEST_URL,
             data: REQUEST_DATA
         }
-        this.log.trace(REQUEST)
-        let r = await sendRequestABS(REQUEST);
-        this.log.unit(`Response from ABS: ${JSON.stringify(r)}`)
 
+        if (!this.tags.DONT_LOG_ABOUT_REQUESTS) { this.log.unit(`Sent to ABS: ${JSON.stringify(REQUEST)}`) };
+        let r = await sendRequestABS(REQUEST);
+        if (!this.tags.DONT_LOG_ABOUT_REQUESTS) { this.log.unit(`Response from ABS: ${JSON.stringify(r)}`) };
         if (!r) { throw new Error(`Sem resposta para a pesquisa do contrato ${contrato}`) } else {return r};
     }
 
     // Utilitário: 
-    async getAction(oldStatus, newStatus) {
+    getAction(oldStatus, newStatus) {
+        let retFunction // Função que vou retornar ao finalizar getAction
         oldStatus = parseInt(oldStatus);
         newStatus = parseInt(newStatus);
+    
+        if (newStatus === oldStatus) { // status igual
+            retFunction = this.executeNoChange
+        } else if (this.STATUS_BLOCK.includes(oldStatus)) { // está bloqueado
+            if (this.STATUS_INACTIVE.includes(newStatus)) { retFunction = this.executeDisable };
+            if (this.STATUS_ACTIVE.includes(newStatus)) { retFunction = this.executeUnblock } ;
 
-        this.log.info('Old status: ' + oldStatus + ', New Status: ' + newStatus)
-
-        // Utilitárias pra melhor legibilidade
-        if (newStatus === oldStatus) {
-            return this.executeNoChange
-        }
-
-        if (this.STATUS_BLOCK.includes(oldStatus)) {
-            if (this.STATUS_INACTIVE.includes(newStatus)) { return this.executeDisable };
-            if (this.STATUS_ACTIVE.includes(newStatus)) { return this.executeUnblock } ;
-        } else if (this.STATUS_INACTIVE.includes(oldStatus)) {
+        } else if (this.STATUS_INACTIVE.includes(oldStatus)) { // está inativo
             if (this.STATUS_BLOCK.includes(newStatus)) { throw new Error("Está inativo, e vai bloquear. Não faz sentido") }; // ué
-            if (this.STATUS_ACTIVE.includes(newStatus)) { return this.executeEnable };
-        } else if (this.STATUS_ACTIVE.includes(oldStatus)) {
-            if (this.STATUS_BLOCK.includes(newStatus)) { return this.executeBlock };
-            if (this.STATUS_INACTIVE.includes(newStatus)) { return this.executeDisable };
+            if (this.STATUS_ACTIVE.includes(newStatus)) { retFunction = this.executeEnable };
+
+        } else if (this.STATUS_ACTIVE.includes(oldStatus)) { // está ativo
+            if (this.STATUS_BLOCK.includes(newStatus)) { retFunction = this.executeBlock };
+            if (this.STATUS_INACTIVE.includes(newStatus)) { retFunction = this.executeDisable };
         } else { throw new Error(`Status não mapeado. "Erro direto"`) } // erro
+
+        // Bindando "this" pra essa função, pra poder utilizar this.REPORT
+        return retFunction.bind(this)
     }
 
     async processClient(cliente) {
-        this.log.unit('Client data: ' + JSON.stringify(cliente));
+        this.log.unit(`Current client data: ${JSON.stringify(cliente)}`);
         try {
             // Obtendo as informações desse contrato no ABS
             const ixc = await this.findClientViaContractInABS(cliente.contrato);
+            let magnusStatusAntigo = cliente.status
+            let magnusStatusNovo = this.IXC_TO_MAGNUS[ixc.contract.status_contrato][0]
 
             // Usando as informações obtidas pra comparar o status antigo com o atual, e decidir uma ação
-            const executeAction = await this.getAction(cliente.status, this.IXC_TO_MAGNUS[ixc.contract.status_contrato][0]);
+            this.log.debug(`${cliente.nome}: Status atual: [${magnusStatusAntigo}], Status novo: [${magnusStatusNovo}]`)
+            const executeAction = this.getAction(magnusStatusAntigo, magnusStatusNovo);
             
             // Executando a ação de fato
-            executeAction(cliente)
+            let OUTPUT_DATA = cliente
+            executeAction(OUTPUT_DATA)
 
             // Ações:
             // Block / Unblock / Disable / Enable -> Criam jobs em outras filas
@@ -128,20 +199,6 @@ class ClientProcessor {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 let ABS_LOG_NAME = "p:SearchContract"
@@ -165,9 +222,7 @@ module.exports = {
         const log = generateLogger(job.data._JOB_IID, path.resolve(ABS_LOG_LOCATION), ABS_LOG_LEVEL, ABS_LOG_FILE_LEVEL, ABS_LOG_FILE_ROTATE);
         log.debug("Starting job...");
 
-        // Processando cada cliente recebido
         // Estou assumindo que a estrutura que chega até mim é:
-
         // job.data = {
         //     tags: {originator: <origem>},
         //     users: {
@@ -175,13 +230,14 @@ module.exports = {
         //     }
         // }
 
-        const clientProcessor = new ClientProcessor(log);
+        const clientProcessor = new ClientProcessor(log, Queue, {DRY: true, FINAL_REPORT_VERBOSELY: false});
         for (const [key, data] of Object.entries(job.data.users)) {
             if (keyShouldBeIgnored(key)) { return; };
             await clientProcessor.processClient(data);
         }
 
         log.info(`Processamento finalizado.`)
+        log.info(clientProcessor.getReport())
 
         done(null, {});
     }

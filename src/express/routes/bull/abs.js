@@ -16,7 +16,7 @@ router
 
         Queue.add('SearchContracts', req.body, {priority: 1})
 
-        res.status(200).json({'teste': 'teste'});
+        res.status(200).json(req.body);
     })
     
     .post('/find/obliterate', async function(req, res){
@@ -24,7 +24,7 @@ router
 
         Queue.add('SearchContracts', req.body, {priority: 1})
 
-        res.status(200).json({'teste': 'teste'});
+        res.status(200).json(req.body);
     })
  
 module.exports = router;

@@ -15,6 +15,9 @@ module.exports = {
         const log = generateLogger(JOB_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE);
         let _DRY = true
 
+        log.trace('Disable Client job data:')
+        log.trace(job.data)
+
         let mb = getMagnusBillingClient();
         
         async function mbGetClientIdFromUsername(username) {
@@ -35,7 +38,7 @@ module.exports = {
 
         async function mbEditUserStatus(userId, newStatus) {
             if (_DRY) {
-                log.debug(`DRY: EditUserStatus`)
+                log.debug(`DRY: EditUserStatus: ID:${userId} -> New: ${newStatus}`)
                 return true
             }
             

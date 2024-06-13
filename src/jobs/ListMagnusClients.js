@@ -42,7 +42,7 @@ module.exports = {
                 usuario: client.username,
                 contrato: client.dist,
                 doc: client.doc,
-                status: parseInt(client.active), // 0:inativo | 1:ativo | 2:pendente | 3:bloqueado entrada | 4:bloqueado entrada e saida
+                statusMagnusAtual: parseInt(client.active), // 0:inativo | 1:ativo | 2:pendente | 3:bloqueado entrada | 4:bloqueado entrada e saida
                 // cpfcnpj: client.cpf_cnpj,
             }          
 
@@ -50,7 +50,7 @@ module.exports = {
                 // log.trace(`${nome} Não está com contrato setado. Usuário '${usuario}'`)
                 // log.trace(`Usuário: ${usuario} / Contrato: ${contrato} / Cliente: ${nome} / Status: ${status}`);
                 doesntHaveContract[CLIENT_DATA.usuario] = CLIENT_DATA; // Salvando o dobro, por facilidade :skulll:
-                switch (CLIENT_DATA.status) {
+                switch (CLIENT_DATA.statusMagnusAtual) {
                     case 0:
                         doesntHaveContract.isInactive[CLIENT_DATA.usuario] = CLIENT_DATA;
                         break;
@@ -64,13 +64,13 @@ module.exports = {
                         doesntHaveContract.isBlocked[CLIENT_DATA.usuario] = CLIENT_DATA;
                         break;
                     default:
-                        job.log(`[WARNING] O usuário ${CLIENT_DATA.usuario} não tem contrato, e está com um status inesperado! ${CLIENT_DATA.status}`)
+                        job.log(`[WARNING] O usuário ${CLIENT_DATA.usuario} não tem contrato, e está com um status inesperado! ${CLIENT_DATA.statusMagnusAtual}`)
                 }
             } else {
                 // log.trace(`${nome} Está com contrato setado. Usuário '${CLIENT_DATA.usuario}'`)
                 // log.trace(`Usuário: ${CLIENT_DATA.usuario} / Contrato: ${contrato} / Cliente: ${nome} / Status: ${status}`);
                 hasContract[CLIENT_DATA.usuario] = CLIENT_DATA; // Salvando o dobro, por facilidade :skulll:
-                switch (CLIENT_DATA.status) {
+                switch (CLIENT_DATA.statusMagnusAtual) {
                     case 0:
                         hasContract.isInactive[CLIENT_DATA.usuario] = CLIENT_DATA;
                         break;
@@ -84,7 +84,7 @@ module.exports = {
                         hasContract.isBlocked[CLIENT_DATA.usuario] = CLIENT_DATA;
                         break;
                     default:
-                        job.log(`[WARNING] O usuário ${CLIENT_DATA.usuario} tem contrato, e está com um status inesperado! ${CLIENT_DATA.status}`)
+                        job.log(`[WARNING] O usuário ${CLIENT_DATA.usuario} tem contrato, e está com um status inesperado! ${CLIENT_DATA.statusMagnusAtual}`)
                 }
             }
     

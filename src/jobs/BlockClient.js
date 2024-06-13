@@ -36,7 +36,7 @@ module.exports = {
 
         async function mbEditUserStatus(userId, newStatus) {
             if (_DRY) {
-                log.debug(`DRY: EditUserStatus`)
+                log.debug(`DRY: EditUserStatus: ID:${userId} -> New: ${newStatus}`)
                 return true
             }
             

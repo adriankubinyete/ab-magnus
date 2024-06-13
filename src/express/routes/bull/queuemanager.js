@@ -17,7 +17,7 @@ function QueueNotExists(error) {
 
 router
 
-    .post('/obliterate', async function(req, res){
+    .delete('/obliterate', async function(req, res){
         const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
         const { queue, data, config } = req.body;
 
