@@ -51,7 +51,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('', data)
+        this.Queue.add('DiscordMessage', data)
         return this;
     }
 
@@ -62,7 +62,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('', data)
+        // this.Queue.add('DiscordMessage', data)
         return this;
     }
 
@@ -73,7 +73,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('', data)
+        this.Queue.add('BlockClient', {users: [data]})
         return this;
     }
 
@@ -84,7 +84,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('', data)
+        this.Queue.add('UnblockClient', {users: [data]})
         return this;
     }
 
@@ -95,7 +95,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('', data)
+        this.Queue.add('EnableClient', {users: [data]})
         return this;
     }
 
@@ -106,7 +106,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('', data)
+        this.Queue.add('DisableClient', {users: [data]})
         return this;
     }
 
@@ -177,7 +177,7 @@ class ClientProcessor {
         try {
             // Obtendo as informações desse contrato no ABS
             const ixc = await this.findClientViaContractInABS(cliente.contrato);
-            let magnusStatusAntigo = cliente.status
+            let magnusStatusAntigo = cliente.statusMagnus
             let magnusStatusNovo = this.IXC_TO_MAGNUS[ixc.contract.status_contrato][0]
 
             // Usando as informações obtidas pra comparar o status antigo com o atual, e decidir uma ação
@@ -199,7 +199,6 @@ class ClientProcessor {
         }
     }
 }
-
 
 let ABS_LOG_NAME = "p:SearchContract"
 let ABS_LOG_LOCATION = "logs/app"
@@ -230,7 +229,7 @@ module.exports = {
         //     }
         // }
 
-        const clientProcessor = new ClientProcessor(log, Queue, {DRY: true, FINAL_REPORT_VERBOSELY: false});
+        const clientProcessor = new ClientProcessor(log, Queue, {DRY: false, FINAL_REPORT_VERBOSELY: false});
         for (const [key, data] of Object.entries(job.data.users)) {
             if (keyShouldBeIgnored(key)) { return; };
             await clientProcessor.processClient(data);

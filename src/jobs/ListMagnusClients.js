@@ -1,6 +1,7 @@
 const path = require("path");
 const { generateLogger } = require( path.resolve("src/util/logging") )
 const { getMagnusBillingClient } = require( path.resolve("src/util/Utils") )
+const { TagValidator } = require( path.resolve("src/util/TagValidator") )
 
 let MAG_LOG_NAME = "p:ListMagnusClients"
 let MAG_LOG_LOCATION = "logs/app"
@@ -13,6 +14,7 @@ module.exports = {
     async handle(job, done, Queue) {
         job.data._JOB_IID = `${MAG_LOG_NAME}:${job.id}`;
         const log = generateLogger(job.data._JOB_IID, path.resolve(MAG_LOG_LOCATION), MAG_LOG_LEVEL, MAG_LOG_FILE_LEVEL, MAG_LOG_FILE_ROTATE);
+        const tagValidator = new TagValidator({}, job, job.data.tags)
 
         let mb = getMagnusBillingClient();
         let result = await mb.clients.users.list({limit: 9999});
@@ -42,15 +44,16 @@ module.exports = {
                 usuario: client.username,
                 contrato: client.dist,
                 doc: client.doc,
-                statusMagnusAtual: parseInt(client.active), // 0:inativo | 1:ativo | 2:pendente | 3:bloqueado entrada | 4:bloqueado entrada e saida
-                // cpfcnpj: client.cpf_cnpj,
+                statusMagnus: parseInt(client.active), // 0:inativo | 1:ativo | 2:pendente | 3:bloqueado entrada | 4:bloqueado entrada e saida
+                statusIxc: null,
+                tags: tagValidator.validatedTags
             }          
 
             if (!CLIENT_DATA.contrato) {
                 // log.trace(`${nome} Não está com contrato setado. Usuário '${usuario}'`)
                 // log.trace(`Usuário: ${usuario} / Contrato: ${contrato} / Cliente: ${nome} / Status: ${status}`);
                 doesntHaveContract[CLIENT_DATA.usuario] = CLIENT_DATA; // Salvando o dobro, por facilidade :skulll:
-                switch (CLIENT_DATA.statusMagnusAtual) {
+                switch (CLIENT_DATA.statusMagnus) {
                     case 0:
                         doesntHaveContract.isInactive[CLIENT_DATA.usuario] = CLIENT_DATA;
                         break;
@@ -64,13 +67,13 @@ module.exports = {
                         doesntHaveContract.isBlocked[CLIENT_DATA.usuario] = CLIENT_DATA;
                         break;
                     default:
-                        job.log(`[WARNING] O usuário ${CLIENT_DATA.usuario} não tem contrato, e está com um status inesperado! ${CLIENT_DATA.statusMagnusAtual}`)
+                        job.log(`[WARNING] O usuário ${CLIENT_DATA.usuario} não tem contrato, e está com um status inesperado! ${CLIENT_DATA.statusMagnus}`)
                 }
             } else {
                 // log.trace(`${nome} Está com contrato setado. Usuário '${CLIENT_DATA.usuario}'`)
                 // log.trace(`Usuário: ${CLIENT_DATA.usuario} / Contrato: ${contrato} / Cliente: ${nome} / Status: ${status}`);
                 hasContract[CLIENT_DATA.usuario] = CLIENT_DATA; // Salvando o dobro, por facilidade :skulll:
-                switch (CLIENT_DATA.statusMagnusAtual) {
+                switch (CLIENT_DATA.statusMagnus) {
                     case 0:
                         hasContract.isInactive[CLIENT_DATA.usuario] = CLIENT_DATA;
                         break;
@@ -84,7 +87,7 @@ module.exports = {
                         hasContract.isBlocked[CLIENT_DATA.usuario] = CLIENT_DATA;
                         break;
                     default:
-                        job.log(`[WARNING] O usuário ${CLIENT_DATA.usuario} tem contrato, e está com um status inesperado! ${CLIENT_DATA.statusMagnusAtual}`)
+                        job.log(`[WARNING] O usuário ${CLIENT_DATA.usuario} tem contrato, e está com um status inesperado! ${CLIENT_DATA.statusMagnus}`)
                 }
             }
     

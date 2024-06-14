@@ -21,21 +21,23 @@ router
         const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
         const { queue, data, config } = req.body;
 
-        try {
-            Queue.obliterate(queue, config);
-        } catch (error) {
-
-            // Conferindo se o erro foi porque a fila não existe
-            if (QueueNotExists(error)) {
-                log.warn(`Não foi possível obliterar a fila "${queue}": fila não existe.`);
-                res.status(404).json(req.body);
-                return;
+        queue.forEach(queue => {
+            try {
+                Queue.obliterate(queue, config);
+            } catch (error) {
+    
+                // Conferindo se o erro foi porque a fila não existe
+                if (QueueNotExists(error)) {
+                    log.warn(`Não foi possível obliterar a fila "${queue}": fila não existe.`);
+                    res.status(404).json(req.body);
+                    return;
+                }
+    
+                // Erro genérico, a fila existe mas deu alguma outra coisa.
+                throw error;
+    
             }
-
-            // Erro genérico, a fila existe mas deu alguma outra coisa.
-            throw error;
-
-        }
+        });
 
         log.warn(`Queue obliterada: ${queue} ( config: ${JSON.stringify(config)} )`)
         res.status(200).json(req.body);

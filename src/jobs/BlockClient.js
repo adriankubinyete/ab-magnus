@@ -1,6 +1,8 @@
 const path = require("path");
 const { generateLogger } = require( path.resolve("src/util/logging") )
 const { getMagnusBillingClient } = require( path.resolve("src/util/Utils") )
+const { TagValidator } = require( path.resolve("src/util/TagValidator"))
+const { ActionProcessor } = require( path.resolve("src/util/ActionProcessor") )
 
 let LOG_NAME = "p:BlockClient"
 let LOG_LOCATION = "logs/app"
@@ -12,65 +14,32 @@ module.exports = {
     key: 'BlockClient',
     config: {},
     async handle(job, done, Queue) {
-        const JOB_NAME = `${LOG_NAME}:${job.id}`
-        const log = generateLogger(JOB_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE);
-        let _DRY = true
+        job.data._JOB_IID = `${LOG_NAME}:${job.id}`;
+        const log = generateLogger(job.data._JOB_IID, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE);
 
-        let mb = getMagnusBillingClient();
-        
-        async function mbGetClientIdFromUsername(username) {
-            log.unit(`Getid username: ${username}`)
-            let ret = await mb.clients.users.getid({
-                filtro: [
-                    ['username', '=', username]
-                ]
-            })
-
-            if (ret) { 
-                return parseInt(ret) 
-            } else { 
-                throw new Error(`Erro ao obter ID do cliente ${username}`)
-            }
-
-        }
-
-        async function mbEditUserStatus(userId, newStatus) {
-            if (_DRY) {
-                log.debug(`DRY: EditUserStatus: ID:${userId} -> New: ${newStatus}`)
-                return true
-            }
-            
-            let ret = await mb.clients.users.edit({
-                id: userId,
-                active: newStatus
-            })
-
-            if (ret && ret.success == true) {
-                log.trace(`EditUserStatus return: ${JSON.stringify(ret)}`)
-                return true
-            } else { 
-                log.error("Alguma coisa aconteceu, não foi possível editar o status do usuário")
-                return false
-            }
-
-        }
+        log.trace(`Job data: ${JSON.stringify(job.data)}`)
 
         let counter = 0;
-        for (const client of job.data) {
+        for (const cliente of job.data.users) {
             counter++;
-            console.log(`Counter: ${counter} | ${JSON.stringify(client)}`);
+            log.unit(`Counter: ${counter} | Client: ${JSON.stringify(cliente)}`);
 
-            try {
-                let magnusId = await mbGetClientIdFromUsername(client.usuario)
-                if (mbEditUserStatus(magnusId, client.statusNovo)) {
-                    log.info(`Sucesso! Usuário ${client.nome} completado. (Novo status: ${client.statusNovo})`)
-                }
-            } catch (error) {
-                throw error;
+            clientTagsSchema = {"DONT_SEND_DISCORD_MESSAGE": {type: 'boolean', default: false}}
+            let clientTags = new TagValidator(clientTagsSchema, job, cliente.tags) // Cada usuário tem sua própria tag
+            let actionProcessor = await new ActionProcessor(job, cliente, getMagnusBillingClient(), clientTags).setMagnusUserId()
+
+            if (await actionProcessor.statusEditSuccessful()) {
+                log.unit(`Status alterado com sucesso: ${cliente.usuario} (${cliente.nome}): ${actionProcessor.magnusOldStatus} -> ${actionProcessor.magnusNewStatus}`)
+            } else {
+                log.error(`Falha para alterar o status do usuário ${cliente.usuario} (${cliente.nome}): ${actionProcessor.magnusOldStatus} -> ${actionProcessor.magnusNewStatus}`)
+            }            
+
+            if (clientTags.DONT_SEND_DISCORD_MESSAGE) {
+                log.unit(`DONT_SEND_DISCORD_MESSAGE: ${JSON.stringify(cliente)}`)
+                continue;
             }
 
-            Queue.add('DiscordMessage', client)
-            // mandar msg no discord
+            Queue.add('DiscordMessage', {action: module.exports.key, ...cliente});
         }
 
         job.progress(100);

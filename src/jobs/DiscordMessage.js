@@ -10,25 +10,25 @@ let LOG_FILE_LEVEL = 10
 let LOG_FILE_ROTATE = "30d"
 
 let embedTemplate = {
-    block : {
+    BlockClient : {
         title: "NOTIFICAÇÃO DE BLOQUEIO",
         hexColor: "#FF3C3C",
         thumbnail: "https://em-content.zobj.net/source/twitter/103/lock_1f512.png",
         url: "https://phonevox.com.br",
     },
-    unblock : {
-        title: "NOTIFICAÇÃO DE BLOQUEIO",
+    UnblockClient : {
+        title: "NOTIFICAÇÃO DE DESBLOQUEIO",
         hexColor: "#1AFF1A",
         thumbnail: "https://static-00.iconduck.com/assets.00/open-lock-emoji-370x512-vszsnxmi.png",
         url: "https://phonevox.com.br",
     },
-    disable : {
+    DisableClient : {
         title: "NOTIFICAÇÃO DE INATIVAÇÃO",
         hexColor: "#FF1A1A",
         thumbnail: "https://em-content.zobj.net/source/toss-face/381/cross-mark-button_274e.png",
         url: "https://phonevox.com.br",
     },
-    enable : {
+    EnableClient : {
         title: "NOTIFICAÇÃO DE ATIVAÇÃO",
         hexColor: "#1AFF1A",
         thumbnail: "https://em-content.zobj.net/source/toss-face/381/check-mark-button_2705.png",
@@ -60,7 +60,7 @@ let messages = {
 }
 
 function getMessageForAction(job) {
-    let preset = embedTemplate[job.data.action];
+    let preset = embedTemplate[(job.data.action ?? 'error')];
     return new MessageBuilder()
     .setTitle(preset.title) // bizzaro mas funciona :D
     .setColor(preset.hexColor)
@@ -81,11 +81,12 @@ module.exports = {
         job.data._WEBHOOK_URL=process.env.DISCORD_WEBHOOK // REFATORAR: Fiz isso pra implementação de tag, mas vou fazer a implementação de tags uma outra hora, sendo generalista (pra incluir as outras filas se necessário alguma tag nelas)
 
         // Runtime        
+        log.unit(`Job data: ${JSON.stringify(job.data)}`)
         const hook = new Webhook(job.data._WEBHOOK_URL);
         let embed = getMessageForAction(job) // REFATORAR: analisar alguma forma de não necessitar passar job aqui?
         hook.send(embed);
 
         job.progress(100);
-        done();
+        done(null, {});
     }
 }
