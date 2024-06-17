@@ -13,8 +13,6 @@ const MAGNUS_QUEUE_ENDPOINT = require(path.resolve('src/express/routes/bull/magn
 // const DISCORD_QUEUE_ENDPOINT = require(path.resolve('src/express/routes/bull/discord'));
 const QUEUE_MANAGER_ENDPOINT = require(path.resolve('src/express/routes/bull/queuemanager'));
 
-// console.log('teste')
-
 let router = express.Router();
 router
     .use(cors())

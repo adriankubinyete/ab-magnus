@@ -1,19 +1,13 @@
 const path = require("path");
-const { generateLogger } = require( path.resolve("src/util/logging") )
+const { Logger } = require( path.resolve("src/util/logging") )
 const { getMagnusBillingClient } = require( path.resolve("src/util/Utils") )
 const { TagValidator } = require( path.resolve("src/util/TagValidator") )
-
-let MAG_LOG_NAME = "p:ListMagnusClients"
-let MAG_LOG_LOCATION = "logs/app"
-let MAG_LOG_LEVEL = 10
-let MAG_LOG_FILE_LEVEL = 10
-let MAG_LOG_FILE_ROTATE = "30d"
 
 module.exports = {
     key: 'ListMagnusClients',
     async handle(job, done, Queue) {
-        job.data._JOB_IID = `${MAG_LOG_NAME}:${job.id}`;
-        const log = generateLogger(job.data._JOB_IID, path.resolve(MAG_LOG_LOCATION), MAG_LOG_LEVEL, MAG_LOG_FILE_LEVEL, MAG_LOG_FILE_ROTATE);
+        job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}`;
+        const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().create()
         const tagValidator = new TagValidator({}, job, job.data.tags)
 
         let mb = getMagnusBillingClient();
@@ -103,7 +97,7 @@ module.exports = {
             // console.log(`DRY: absqFind.add(${hasContract}, ${doesntHaveContract})`)
             const { isActive, isInactive, isBlocked, ...filteredHasContract } = hasContract;
             Queue.add('SearchContracts', {
-                tags: {originator: job.data._JOB_IID},
+                tags: {originator: job.data._JOB_INTERNAL_ID},
                 users: {...filteredHasContract},
             } );
 

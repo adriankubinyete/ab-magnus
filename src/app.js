@@ -1,7 +1,6 @@
 require("dotenv").config();
 const path = require("path");
-const colors = require("colors");
-const { generateLogger } = require( path.resolve('src/util/logging') );
+const { Logger } = require( path.resolve('src/util/logging') );
 // Bull
 const { mqList } = require( path.resolve('src/bull/queues') )
 // Express
@@ -10,7 +9,7 @@ const { setLogPrefix } = require(path.resolve('src/express/middlewares'))
 const express = require('express');
 
 // Preparando terreno
-const log = generateLogger(process.env.LOG_NAME, path.resolve(__dirname, process.env.LOG_LOCATION), process.env.LOG_LEVEL, process.env.LOG_FILE_LEVEL, process.env.LOG_FILE_ROTATE);
+const log = new Logger("MAIN_APP", false).useEnvConfig().create()
 
 // Iniciando o Express e suas rotas.
 const app = express();
@@ -36,9 +35,7 @@ const HEARTBEAT = ONE_MINUTE
 // O centro de tudo: é aqui que é setado a job pra inicializar a pesquisa no Magnus, e do magnus, ele joga pra
 // job de pesquisa no IXC
 
-console.log('test: ' + !(process.env.PAUSE_PRIMARY_JOB === 'true'))
-
-if (!(process.env.PAUSE_PRIMARY_JOB === 'true')) {
+if (JSON.parse(process.env.PAUSE_PRIMARY_JOB)) {
     console.log('adding job')
     mqList.add({}, {repeat: {cron: HEARTBEAT}})
 }

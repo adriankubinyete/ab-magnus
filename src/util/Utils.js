@@ -2,7 +2,7 @@ const path = require("path");
 const axios = require("axios");
 const { createHash } = require("crypto");
 const { MagnusBilling } = require( path.resolve("src/lib/magnusbilling-node/index") );
-const { generateLogger } = require( path.resolve("src/util/logging") );
+const { Logger } = require( path.resolve("src/util/logging") );
 const { bombGame } = require( path.resolve("src/util/Game"));
 
 function getMagnusBillingClient() {
@@ -25,14 +25,9 @@ function sha256(x, y = {digest: hex}) {
 // Formatar a mensagem do discord
 // formatDiscordMessage(msg, {fake_var: replaced_var...})
 function formatDiscordMessage(message, varMapping) {
-    let LOG_NAME = "formatDiscordMessage"
-    let LOG_LOCATION = "logs/app"
-    let LOG_LEVEL = 10
-    let LOG_FILE_LEVEL = 10
-    let LOG_FILE_ROTATE = "30d"
-    const log = generateLogger(LOG_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
-
-    varMapping.game = bombGame()
+    let LOG_NAME = "FormatDiscordMessage"
+    const log = new Logger(LOG_NAME, false).useEnvConfig().create()
+    varMapping.game = bombGame() // easter egg
     
     return message.replace(/\\?%\w+%/g, (match) => {
         if (match.startsWith('\\')) {
@@ -55,12 +50,8 @@ function formatDiscordMessage(message, varMapping) {
 // TODO:
 // Organizar isso aqui em outro local?
 async function obtainNewJWT() {
-    let LOG_NAME = "obtainNewJWT"
-    let LOG_LOCATION = "logs/app"
-    let LOG_LEVEL = 10
-    let LOG_FILE_LEVEL = 10
-    let LOG_FILE_ROTATE = "30d"
-    const log = generateLogger(LOG_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
+    let LOG_NAME = "ObtainNewJWT"
+    const log = new Logger(LOG_NAME, false).useEnvConfig().create()
 
     // Requisitando o JWT
     let JWT_AUTH_ENDPOINT = '/auth'
@@ -72,18 +63,18 @@ async function obtainNewJWT() {
             "password": process.env.AUTOBLOCKERSERVER_PASSWORD,
         }
     }
-    log.debug(`[JWT_REQUEST] Obtendo novo JWT`)
-    log.debug('[JWT_REQUEST] ' + JSON.stringify(JWT_REQ))
+    log.unit(`Obtendo novo JWT`)
+    log.unit(JSON.stringify(JWT_REQ))
     let res = await axios.request(JWT_REQ)
 
     // Analisando o resultado pra ver se foi sucesso
     if (!res.status === 200) {
-        log.error('[JWT_REQUEST] FAIL: Parece que não foi possível obter um JSON WEB TOKEN, o status da requisição está diferente do esperado: ' + JSON.stringify(res));
+        log.error('FAIL: Parece que não foi possível obter um JSON WEB TOKEN, o status da requisição está diferente do esperado: ' + JSON.stringify(res));
         return false
     }
 
     // Deu certo, agora seto esse JSON como disponível.
-    log.debug("[JWT_REQUEST] SUCCESS: JSON Web Token obtido: " + res.data.token);
+    log.trace("SUCCESS: JSON Web Token obtido: " + res.data.token);
     process.env.JSON_WEB_TOKEN = res.data.token;
     return true
 }
@@ -91,12 +82,8 @@ async function obtainNewJWT() {
 // TODO:
 // Organizar isso aqui em outro local?
 async function sendRequestABS(AXIOS_REQUEST_PARAMS, isJwtRetry = false) {
-    let LOG_NAME = "sendRequestABS"
-    let LOG_LOCATION = "logs/app"
-    let LOG_LEVEL = 10
-    let LOG_FILE_LEVEL = 10
-    let LOG_FILE_ROTATE = "30d"
-    const log = generateLogger(LOG_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
+    let LOG_NAME = "SendRequestABS"
+    const log = new Logger(LOG_NAME, false).useEnvConfig().create()
 
     // Verificando se é necessário gerar um JWT novo
     if (!process.env.JSON_WEB_TOKEN | isJwtRetry) { await obtainNewJWT() }
@@ -108,9 +95,6 @@ async function sendRequestABS(AXIOS_REQUEST_PARAMS, isJwtRetry = false) {
         AXIOS_REQUEST_PARAMS.headers = { Authorization: process.env.JSON_WEB_TOKEN }
     }
 
-    // DEBUG: manualmente atrapalhando o JWT pra simular um jwt expirado
-    // if (!isJwtRetry) { AXIOS_REQUEST_PARAMS.headers.Authorization = 'w' }
-
     // Envia a requisição e retorna TUDO, completamente
     let res // inicializando a variável que vai segurar a resposta
     try {
@@ -120,9 +104,9 @@ async function sendRequestABS(AXIOS_REQUEST_PARAMS, isJwtRetry = false) {
         console.log(err)
         // Analisando o erro: se for por causa de JWT
         if (err.response.status === 401) {
-            log.warn(`[${err.response.status}] [${err.response.statusText}] Requisição falhou, aparentemente por JWT Inválido.`)
+            log.warn(`[${err.response.status}] [${err.response.statusText}] Requisição falhou, possivelmente por JWT Inválido.`)
             if (!isJwtRetry) { // se for um jwtRetry, eu não posso enviar denovo, pq se não só looparia.
-                log.debug('Tentando re-enviar a requisição...')
+                log.unit('Tentando re-enviar a requisição...')
                 return await sendRequestABS(AXIOS_REQUEST_PARAMS, true)
             }
         }

@@ -1,14 +1,10 @@
 const path = require("path");
-const { generateLogger } = require(path.resolve("src/util/logging"));
-
-let LOG_LOCATION = "logs/app"
-let LOG_LEVEL = 10
-let LOG_FILE_LEVEL = 10
-let LOG_FILE_ROTATE = "30d"
+const { Logger } = require(path.resolve("src/util/logging"));
 
 class TagValidator {
     constructor(schema, job, tagsToValidate) {
-        this.log = generateLogger(job.data._JOB_IID, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
+        this.LOG_NAME = `${job.data._JOB_INTERNAL_ID}:TagValidator`
+        this.log = new Logger(this.LOG_NAME, false).useEnvConfig().create()
         
         this.VERBOSE = true;
         this.validatedTags = {};

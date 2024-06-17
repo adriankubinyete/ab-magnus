@@ -1,20 +1,14 @@
 const path = require("path");
-const { generateLogger } = require( path.resolve("src/util/logging") )
+const { Logger } = require( path.resolve("src/util/logging") )
 const { getMagnusBillingClient } = require( path.resolve("src/util/Utils") )
 const { TagValidator } = require( path.resolve("src/util/TagValidator"))
 const { ActionProcessor } = require( path.resolve("src/util/ActionProcessor") )
 
-let LOG_NAME = "p:EnableClient"
-let LOG_LOCATION = "logs/app"
-let LOG_LEVEL = 10
-let LOG_FILE_LEVEL = 10
-let LOG_FILE_ROTATE = "30d"
-
 module.exports = {
     key: 'EnableClient',
     async handle(job, done, Queue) {
-        job.data._JOB_IID = `${LOG_NAME}:${job.id}`;
-        const log = generateLogger(job.data._JOB_IID, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE);
+        job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}`;
+        const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().create()
 
         log.trace(`Job data: ${JSON.stringify(job.data)}`)
 

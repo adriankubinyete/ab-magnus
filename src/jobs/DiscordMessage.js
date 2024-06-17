@@ -1,13 +1,7 @@
 const path = require("path");
+const { Logger } = require(path.resolve("src/util/logging"))
 const { formatDiscordMessage } = require(path.resolve("src/util/Utils"))
-const { generateLogger } = require(path.resolve("src/util/logging"))
 const { Webhook, MessageBuilder } = require('discord-webhook-node');     
-
-let LOG_NAME = "p:DiscordMessage"
-let LOG_LOCATION = "logs/app"
-let LOG_LEVEL = 10
-let LOG_FILE_LEVEL = 10
-let LOG_FILE_ROTATE = "30d"
 
 let embedTemplate = {
     BlockClient : {
@@ -74,8 +68,8 @@ module.exports = {
     // required: ['originator', 'nome', 'usuario', 'statusAtual', 'statusNovo'], // FEATURE: implementar isso pra todos, eventualmente
     config: {limiter: { max: 5, duration: 5 * 1000 }},
     async handle(job, done, Queue) {
-        job.data._JOB_IID = `${LOG_NAME}:${job.id}`
-        const log = generateLogger(job.data._JOB_IID, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE);
+        job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}`;
+        const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().create()
 
         // Default values
         job.data._WEBHOOK_URL=process.env.DISCORD_WEBHOOK // REFATORAR: Fiz isso pra implementação de tag, mas vou fazer a implementação de tags uma outra hora, sendo generalista (pra incluir as outras filas se necessário alguma tag nelas)

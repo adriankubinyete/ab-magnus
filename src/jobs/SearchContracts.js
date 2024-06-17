@@ -1,7 +1,6 @@
 const path = require("path");
-const { generateLogger } = require(path.resolve("src/util/logging"))
+const { Logger } = require(path.resolve("src/util/logging"))
 const { sha256, sendRequestABS } = require(path.resolve("src/util/Utils"))
-
 class ClientProcessor {
     constructor(log, queue, tags = {}) {
         this.Queue = queue;
@@ -202,12 +201,6 @@ class ClientProcessor {
     }
 }
 
-let ABS_LOG_NAME = "p:SearchContract"
-let ABS_LOG_LOCATION = "logs/app"
-let ABS_LOG_LEVEL = 10
-let ABS_LOG_FILE_LEVEL = 10
-let ABS_LOG_FILE_ROTATE = "30d"
-
 function keyShouldBeIgnored(key) {
     let KEYS_TO_IGNORE = ['originator']
     if (KEYS_TO_IGNORE.includes(key)) { 
@@ -219,9 +212,8 @@ function keyShouldBeIgnored(key) {
 module.exports = {
     key: 'SearchContracts',
     async handle(job, done, Queue) {
-        job.data._JOB_IID = `${ABS_LOG_NAME}:${job.id}`;
-        const log = generateLogger(job.data._JOB_IID, path.resolve(ABS_LOG_LOCATION), ABS_LOG_LEVEL, ABS_LOG_FILE_LEVEL, ABS_LOG_FILE_ROTATE);
-        log.debug("Starting job...");
+        job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}`;
+        const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().create()
 
         // Estou assumindo que a estrutura que chega até mim é:
         // job.data = {

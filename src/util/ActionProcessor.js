@@ -1,15 +1,11 @@
 const path = require("path");
-const { generateLogger } = require(path.resolve("src/util/logging"));
-
-let LOG_LOCATION = "logs/app"
-let LOG_LEVEL = 10
-let LOG_FILE_LEVEL = 10
-let LOG_FILE_ROTATE = "30d"
+const { Logger } = require(path.resolve("src/util/logging"));
 
 class ActionProcessor {
     constructor(job, cliente, magnusBillingClient, tagProcessor) {
         // Loggers/Validators
-        this.log = generateLogger(`${job.data._JOB_IID}:actionProcessor:${cliente.usuario}`, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
+        this.LOG_NAME = `${job.data._JOB_INTERNAL_ID}:ActionProcessor:${cliente.usuario}`
+        this.log = new Logger(this.LOG_NAME, false).useEnvConfig().create()
         this.tag = tagProcessor;
         // this.tag.overwriteTag('DRY', true); // Dev-only
         
