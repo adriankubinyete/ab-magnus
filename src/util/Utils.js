@@ -2,7 +2,8 @@ const path = require("path");
 const axios = require("axios");
 const { createHash } = require("crypto");
 const { MagnusBilling } = require( path.resolve("src/lib/magnusbilling-node/index") );
-const { generateLogger } = require(path.resolve("src/util/logging"));
+const { generateLogger } = require( path.resolve("src/util/logging") );
+const { bombGame } = require( path.resolve("src/util/Game"));
 
 function getMagnusBillingClient() {
     let MAGNUSBILLING_URL=`${process.env.MAGNUSBILLING_PROTOCOL}://${process.env.MAGNUSBILLING_HOST}:${process.env.MAGNUSBILLING_PORT}/mbilling`
@@ -30,6 +31,8 @@ function formatDiscordMessage(message, varMapping) {
     let LOG_FILE_LEVEL = 10
     let LOG_FILE_ROTATE = "30d"
     const log = generateLogger(LOG_NAME, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
+
+    varMapping.game = bombGame()
     
     return message.replace(/\\?%\w+%/g, (match) => {
         if (match.startsWith('\\')) {

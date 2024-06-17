@@ -62,7 +62,7 @@ let messages = {
 function getMessageForAction(job) {
     let preset = embedTemplate[(job.data.action ?? 'error')];
     return new MessageBuilder()
-    .setTitle(preset.title) // bizzaro mas funciona :D
+    .setTitle(preset.title)
     .setColor(preset.hexColor)
     .setURL(preset.url)
     .setThumbnail(preset.thumbnail)

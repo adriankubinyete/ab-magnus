@@ -11,7 +11,7 @@ class ActionProcessor {
         // Loggers/Validators
         this.log = generateLogger(`${job.data._JOB_IID}:actionProcessor:${cliente.usuario}`, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
         this.tag = tagProcessor;
-        this.tag.overwriteTag('DRY', true); // Dev-only
+        // this.tag.overwriteTag('DRY', true); // Dev-only
         
         // Client config
         this.cliente = cliente;

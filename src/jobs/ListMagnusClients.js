@@ -40,12 +40,13 @@ module.exports = {
         result.rows.forEach(client => {
             counter++
             let CLIENT_DATA = {
-                nome: client.lastname,
-                usuario: client.username,
+                nome: client.lastname ?? 'name_not_set',
+                usuario: client.username ?? 'user_not_set',
                 contrato: client.dist,
-                doc: client.doc,
+                doc: client.doc ?? 'doc_not_set',
                 statusMagnus: parseInt(client.active), // 0:inativo | 1:ativo | 2:pendente | 3:bloqueado entrada | 4:bloqueado entrada e saida
-                statusIxc: null,
+                statusIxc: undefined,
+                statusIxcVerbose: undefined,
                 tags: tagValidator.validatedTags
             }          
 

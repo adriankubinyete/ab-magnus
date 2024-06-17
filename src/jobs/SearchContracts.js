@@ -10,6 +10,7 @@ class ClientProcessor {
             DRY: tags.DRY ?? false,
             DONT_LOG_ABOUT_REQUESTS: tags.DONT_LOG_ABOUT_REQUESTS ?? true,
             FINAL_REPORT_VERBOSELY: tags.FINAL_REPORT_VERBOSELY ?? false,
+            DONT_REPORT_NOCHANGE: tags.DONT_REPORT_NOCHANGE ?? process.env.DONT_REPORT_NOCHANGE ?? true
         }
 
         // O que cada ID significa no Magnus.
@@ -177,12 +178,13 @@ class ClientProcessor {
         try {
             // Obtendo as informações desse contrato no ABS
             const ixc = await this.findClientViaContractInABS(cliente.contrato);
-            let magnusStatusAntigo = cliente.statusMagnus
-            let magnusStatusNovo = this.IXC_TO_MAGNUS[ixc.contract.status_contrato][0]
+            cliente.statusMagnus = cliente.statusMagnus
+            cliente.statusIxc = this.IXC_TO_MAGNUS[ixc.contract.status_contrato][0]
+            cliente.statusIxcVerbose = ixc.contract.status_contrato
 
             // Usando as informações obtidas pra comparar o status antigo com o atual, e decidir uma ação
-            this.log.debug(`${cliente.nome}: Status atual: [${magnusStatusAntigo}], Status novo: [${magnusStatusNovo}]`)
-            const executeAction = this.getAction(magnusStatusAntigo, magnusStatusNovo);
+            this.log.debug(`${cliente.nome}: Status atual: [${cliente.statusMagnus}], Status novo: [${cliente.statusIxc}]`)
+            const executeAction = this.getAction(cliente.statusMagnus, cliente.statusIxc);
             
             // Executando a ação de fato
             let OUTPUT_DATA = cliente
