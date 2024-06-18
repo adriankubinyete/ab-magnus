@@ -9,14 +9,11 @@ module.exports = {
     key: 'DisableClient',
     async handle(job, done, Queue) {
         job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}`;
-        const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().create()
-
-        log.trace(`Job data: ${JSON.stringify(job.data)}`)
-
         let counter = 0;
         for (const cliente of job.data.users) {
             counter++;
-            log.unit(`Counter: ${counter} | Client: ${JSON.stringify(cliente)}`);
+            const log = new Logger(`${job.data._JOB_INTERNAL_ID}:User:${cliente.usuario}`, false).useEnvConfig().setJob(job).create()
+            log.info(`Counter: ${counter} | Client: ${JSON.stringify(cliente)}`);
 
             clientTagsSchema = {"DONT_SEND_DISCORD_MESSAGE": {type: 'boolean', default: false}}
             let clientTags = new TagValidator(clientTagsSchema, job, cliente.tags) // Cada usuário tem sua própria tag

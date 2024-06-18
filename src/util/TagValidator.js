@@ -4,7 +4,7 @@ const { Logger } = require(path.resolve("src/util/logging"));
 class TagValidator {
     constructor(schema, job, tagsToValidate) {
         this.LOG_NAME = `${job.data._JOB_INTERNAL_ID}:TagValidator`
-        this.log = new Logger(this.LOG_NAME, false).useEnvConfig().create()
+        this.log = new Logger(this.LOG_NAME, false).useEnvConfig().setJob(job).create()
         
         this.VERBOSE = true;
         this.validatedTags = {};
@@ -48,7 +48,7 @@ class TagValidator {
 
     defaultSchema() {
         return {
-            DRY: {type: 'boolean', default: true},
+            DRY: {type: 'boolean', default: false},
             VERBOSE: {type: 'boolean', default: false},
         }
     }

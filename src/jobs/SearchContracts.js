@@ -1,5 +1,6 @@
 const path = require("path");
 const { Logger } = require(path.resolve("src/util/logging"))
+const { TagValidator } = require( path.resolve("src/util/TagValidator") )
 const { sha256, sendRequestABS } = require(path.resolve("src/util/Utils"))
 class ClientProcessor {
     constructor(log, queue, tags = {}) {
@@ -73,7 +74,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('BlockClient', {users: [data]})
+        this.Queue.add('BlockClient', data)
         return this;
     }
 
@@ -84,7 +85,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('UnblockClient', {users: [data]})
+        this.Queue.add('UnblockClient', data)
         return this;
     }
 
@@ -95,7 +96,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('EnableClient', {users: [data]})
+        this.Queue.add('EnableClient', data)
         return this;
     }
 
@@ -106,7 +107,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('DisableClient', {users: [data]})
+        this.Queue.add('DisableClient', data)
         return this;
     }
 
@@ -141,9 +142,9 @@ class ClientProcessor {
             data: REQUEST_DATA
         }
 
-        if (!this.tags.DONT_LOG_ABOUT_REQUESTS) { this.log.unit(`Sent to ABS: ${JSON.stringify(REQUEST)}`) };
+        if (!this.tags.DONT_LOG_ABOUT_REQUESTS) { this.log.unit(`FindClient: Requisição enviada: ${JSON.stringify(REQUEST)}`) };
         let r = await sendRequestABS(REQUEST);
-        if (!this.tags.DONT_LOG_ABOUT_REQUESTS) { this.log.unit(`Response from ABS: ${JSON.stringify(r)}`) };
+        if (!this.tags.DONT_LOG_ABOUT_REQUESTS) { this.log.unit(`FindClient: Resposta recebida: ${JSON.stringify(r)}`) };
         if (!r) { throw new Error(`Sem resposta para a pesquisa do contrato ${contrato}`) } else {return r};
     }
 
@@ -173,8 +174,8 @@ class ClientProcessor {
     }
 
     async processClient(cliente) {
-        this.log.unit(`Current client data: ${JSON.stringify(cliente)}`);
         try {
+            this.log.info(`Processando cliente "${cliente.nome}" (${cliente.usuario})...`)
             // Obtendo as informações desse contrato no ABS
             const ixc = await this.findClientViaContractInABS(cliente.contrato);
             cliente.statusMagnus = cliente.statusMagnus
@@ -182,21 +183,17 @@ class ClientProcessor {
             cliente.statusIxcVerbose = ixc.contract.status_contrato
 
             // Usando as informações obtidas pra comparar o status antigo com o atual, e decidir uma ação
-            this.log.debug(`${cliente.nome}: Status atual: [${cliente.statusMagnus}], Status novo: [${cliente.statusIxc}]`)
+            job.log(`${cliente.usuario} : ${cliente.statusMagnus} -> ${cliente.statusIxc} (${cliente.statusIxcVerbose}) (${cliente.nome})`) // sim, job.log
             const executeAction = this.getAction(cliente.statusMagnus, cliente.statusIxc);
             
             // Executando a ação de fato
-            let OUTPUT_DATA = cliente
+            let OUTPUT_DATA = {tags: {originator: job.data._JOB_INTERNAL_ID}, users: [cliente]}
             executeAction(OUTPUT_DATA)
-
-            // Ações:
-            // Block / Unblock / Disable / Enable -> Criam jobs em outras filas
-            // NoChange -> Não faz nada
         } catch (error) {
-            console.log('UM ERRO OCORREU: ' + error.stack)
+            this.log.error(`Um erro ocorreu ao processar o cliente ${cliente.nome} (${cliente.usuario}): ${error}`)
+            this.log.error(error.stack)
+            this.log.debug(JSON.stringify(cliente))
             this.executeNotifyError(cliente) // Deve enviar uma mensagem explicando o que houve.
-            // se não conseguiu mapear uma ação, falha
-            // deve reportar o erro pra fila
         }
     }
 }
@@ -213,24 +210,27 @@ module.exports = {
     key: 'SearchContracts',
     async handle(job, done, Queue) {
         job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}`;
-        const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().create()
-
-        // Estou assumindo que a estrutura que chega até mim é:
-        // job.data = {
-        //     tags: {originator: <origem>},
-        //     users: {
-        //         "<usuario>": {...<dadosDoUsuario>}
-        //     }
-        // }
+        const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().setJob(job).create()
+        log.trace(`Job Data: ${job.data}`)
 
         const clientProcessor = new ClientProcessor(log, Queue, {DRY: false, FINAL_REPORT_VERBOSELY: false});
-        for (const [key, data] of Object.entries(job.data.users)) {
-            if (keyShouldBeIgnored(key)) { return; };
-            await clientProcessor.processClient(data);
-        }
 
-        log.info(`Processamento finalizado.`)
-        log.info(clientProcessor.getReport())
+        let USERS_TO_SEARCH = job.data.users.length;
+        let USERS_COUNTER = 0;
+
+        log.info(`Iniciando o processamento dos clientes.`)
+        for (const [key, data] of Object.entries(job.data.users)) {
+            USERS_COUNTER++
+            if (keyShouldBeIgnored(key)) { 
+                log.info(`Ignorando a chave "${key}", com os seguintes dados: ${data}`)
+                return; 
+            }
+            await clientProcessor.processClient(data);
+
+            // aqui eu atualizo o progress
+        }
+        log.info(`Processamento de clientes finalizado.`)
+        log.info( JSON.stringify(clientProcessor.getReport()) )
 
         done(null, {});
     }

@@ -4,8 +4,8 @@ const { Logger } = require(path.resolve("src/util/logging"));
 class ActionProcessor {
     constructor(job, cliente, magnusBillingClient, tagProcessor) {
         // Loggers/Validators
-        this.LOG_NAME = `${job.data._JOB_INTERNAL_ID}:ActionProcessor:${cliente.usuario}`
-        this.log = new Logger(this.LOG_NAME, false).useEnvConfig().create()
+        this.LOG_NAME = `${job.data._JOB_INTERNAL_ID}:ActionProcessor:User:${cliente.usuario}`
+        this.log = new Logger(this.LOG_NAME, false).useEnvConfig().setJob(job).create()
         this.tag = tagProcessor;
         // this.tag.overwriteTag('DRY', true); // Dev-only
         
@@ -31,7 +31,12 @@ class ActionProcessor {
     }
 
     async mbEditUserStatus(userId, newStatus) {
+        console.log('EDIT USER STATUS')
+        this.log.info('test')
+
         if (this.tag.DRY) {
+            console.log(this.tag)
+            console.log('TAG DRY EDIT USER STATUS')
             this.log.debug(`DRY: EditUserStatus: ID:${userId} -> New: ${newStatus}`);
             return true;
         }

@@ -1,15 +1,8 @@
 const path = require("path");
 const express = require('express');
 const Queue = require(path.resolve("src/lib/Queue"));
-const { generateLogger } = require( path.resolve("src/util/logging") )
+const { Logger } = require( path.resolve("src/util/logging") )
 let router = express.Router();
-
-let LOG_NAME = ""
-let LOG_LOCATION = "logs/app"
-let LOG_LEVEL = 10
-let LOG_FILE_LEVEL = 10
-let LOG_FILE_ROTATE = "30d"
-
 
 function QueueNotExists(error) {
     return (error instanceof TypeError && error.message.includes("reading 'bull'"))
@@ -18,7 +11,7 @@ function QueueNotExists(error) {
 router
 
     .delete('/obliterate', async function(req, res){
-        const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
+        const log = new Logger(req.logPrefix, false).useEnvConfig().create()
         const { queue, data, config } = req.body;
 
         queue.forEach(queue => {
@@ -44,7 +37,7 @@ router
     })
 
     .post('/add', async function(req, res){
-        const log = generateLogger(req.logPrefix, path.resolve(LOG_LOCATION), LOG_LEVEL, LOG_FILE_LEVEL, LOG_FILE_ROTATE)
+        const log = new Logger(req.logPrefix, false).useEnvConfig().create()
         const { queue, data, config } = req.body;
 
         try {

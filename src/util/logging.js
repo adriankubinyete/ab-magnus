@@ -1,4 +1,3 @@
-// npm install winston
 const winston = require('winston');
 const path = require('path');
 const DailyRotateFile = require('winston-daily-rotate-file');
@@ -6,7 +5,7 @@ const DailyRotateFile = require('winston-daily-rotate-file');
 class Logger {
     constructor(name = undefined, debug = false) {
 
-        this.NAME = undefined;
+        this.NAME = name;
         this.LOCATION = undefined;
         this.CONSOLE_LEVEL = 'info';
         this.FILE_LEVEL = 'info';
@@ -125,6 +124,9 @@ class Logger {
             this[level] = (message) => {
                 if (this.WINSTON_LOG) {
                     this.WINSTON_LOG[level](message);
+                    if (this.JOB) {
+                        this.JOB.log(message);
+                    }
                 } else {
                     console.error('Winston logger is not defined');
                 }
@@ -221,15 +223,21 @@ class Logger {
         this.ROTATE = rotate;
         return this;
     }
+
+    setJob(job) {
+        this.JOB = job;
+        return this;
+    }
+
 }
 
-// CRITICAL : algo essencial não vai funcionar.
-// ERROR    : algo relativamente inesperado ocorreu.
-// WARN     : algo pode dar errado.
-// INFO     : informativo.
-// DEBUG    : informações extras / exageradas.
-// TRACE    : mais profundo que um debug.
-// UNIT     : Teste de unidade. conferir valor de variável, true/falses básicos, etc.
+// CRITICAL : Erros graves, que impossibilitam a execução, ou há perda de dados importantes.
+// ERROR    : Erros que exigem atenção imediata, mas não interrompem a execução do sistema.
+// WARN     : Erro não-direto, mas que pode causar problemas. Avisos.
+// INFO     : Eventos úteis, que não indicam problema, apenas para auditoria.
+// DEBUG    : Informações úteis à depuração.
+// TRACE    : Informações detalhadas à nível granular. Execução passo-a-passo.
+// UNIT     : Específicos, testes unitários.
 
 module.exports = {
     Logger

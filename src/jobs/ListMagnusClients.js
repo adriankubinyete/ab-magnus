@@ -7,7 +7,7 @@ module.exports = {
     key: 'ListMagnusClients',
     async handle(job, done, Queue) {
         job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}`;
-        const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().create()
+        const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().setJob(job).create()
         const tagValidator = new TagValidator({}, job, job.data.tags)
 
         let mb = getMagnusBillingClient();

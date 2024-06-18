@@ -1,7 +1,6 @@
 require("dotenv").config();
 const path = require("path");
 const { Logger } = require( path.resolve("src/util/logging") );
-const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().create()
 
 const Queue = require(path.resolve("src/lib/Queue"));
 
