@@ -31,12 +31,7 @@ class ActionProcessor {
     }
 
     async mbEditUserStatus(userId, newStatus) {
-        console.log('EDIT USER STATUS')
-        this.log.info('test')
-
         if (this.tag.DRY) {
-            console.log(this.tag)
-            console.log('TAG DRY EDIT USER STATUS')
             this.log.debug(`DRY: EditUserStatus: ID:${userId} -> New: ${newStatus}`);
             return true;
         }

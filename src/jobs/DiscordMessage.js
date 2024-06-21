@@ -32,7 +32,7 @@ let embedTemplate = {
         thumbnail: "https://em-content.zobj.net/source/toss-face/381/check-mark-button_2705.png",
         url: "https://phonevox.com.br",
     },
-    error : {
+    ReportError : {
         type: "ERROR",
         title: "ALGUM ERRO OCORREU!",
         hexColor: "#FF00FF",
@@ -59,14 +59,14 @@ let messages = {
     }
 }
 
-function getMessageForAction(job) {
-    let preset = embedTemplate[(job.data.action ?? 'error')];
+function getMessageForAction(log, job) {
+    let preset = embedTemplate[(job.data.action ?? 'debug')];
     return new MessageBuilder()
     .setTitle(preset.title)
     .setColor(preset.hexColor)
     .setURL(preset.url)
     .setThumbnail(preset.thumbnail)
-    .setDescription(formatDiscordMessage(process.env.DISCORD_REPORT_MESSAGE, job.data))
+    .setDescription(formatDiscordMessage(log, process.env.DISCORD_REPORT_MESSAGE, job.data))
 }
 
 module.exports = {
@@ -74,16 +74,19 @@ module.exports = {
     // required: ['originator', 'nome', 'usuario', 'statusAtual', 'statusNovo'], // FEATURE: implementar isso pra todos, eventualmente
     config: {limiter: { max: 5, duration: 5 * 1000 }},
     async handle(job, done, Queue) {
-        job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}`;
+        job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}:User:${job.data.usuario}`;
         const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().setJob(job).create()
         log.unit(`Job Data: ${JSON.stringify(job.data)}`)
+
+        console.log('DISCORDMESSAGE TEST JOB')
+        console.log(job)
 
         // Default values
         job.data._WEBHOOK_URL=process.env.DISCORD_WEBHOOK // REFATORAR: Fiz isso pra implementação de tag, mas vou fazer a implementação de tags uma outra hora, sendo generalista (pra incluir as outras filas se necessário alguma tag nelas)
 
         // Runtime
         log.trace(`Obtendo a embed...`)
-        let embed = getMessageForAction(job) // REFATORAR: analisar alguma forma de não necessitar passar job aqui?
+        let embed = getMessageForAction(log, job) // REFATORAR: analisar alguma forma de não necessitar passar job aqui?
         log.unit(`Embed: ${JSON.stringify(embed)}`)
 
 

@@ -3,9 +3,10 @@ const { Logger } = require(path.resolve("src/util/logging"))
 const { TagValidator } = require( path.resolve("src/util/TagValidator") )
 const { sha256, sendRequestABS } = require(path.resolve("src/util/Utils"))
 class ClientProcessor {
-    constructor(log, queue, tags = {}) {
+    constructor(log, queue, job, tags = {}) {
         this.Queue = queue;
         this.log = log;
+        this.job = job;
         this.tags = {
             DRY: tags.DRY ?? false,
             DONT_LOG_ABOUT_REQUESTS: tags.DONT_LOG_ABOUT_REQUESTS ?? true,
@@ -52,7 +53,7 @@ class ClientProcessor {
             return this;
         }
 
-        this.Queue.add('DiscordMessage', data)
+        this.Queue.add('DiscordMessage', {action: "ReportError", ...data})
         return this;
     }
 
@@ -183,14 +184,14 @@ class ClientProcessor {
             cliente.statusIxcVerbose = ixc.contract.status_contrato
 
             // Usando as informações obtidas pra comparar o status antigo com o atual, e decidir uma ação
-            job.log(`${cliente.usuario} : ${cliente.statusMagnus} -> ${cliente.statusIxc} (${cliente.statusIxcVerbose}) (${cliente.nome})`) // sim, job.log
+            this.log.unit(`"${cliente.nome}" (${cliente.usuario}) : ${cliente.statusMagnus} -> ${cliente.statusIxc} (${cliente.statusIxcVerbose})`);
             const executeAction = this.getAction(cliente.statusMagnus, cliente.statusIxc);
             
             // Executando a ação de fato
-            let OUTPUT_DATA = {tags: {originator: job.data._JOB_INTERNAL_ID}, users: [cliente]}
+            let OUTPUT_DATA = {tags: {originator: this.job.data._JOB_INTERNAL_ID}, users: [cliente]}
             executeAction(OUTPUT_DATA)
         } catch (error) {
-            this.log.error(`Um erro ocorreu ao processar o cliente ${cliente.nome} (${cliente.usuario}): ${error}`)
+            this.log.error(`Um erro ocorreu ao processar o cliente "${cliente.nome}" (${cliente.usuario}): ${error}`)
             this.log.error(error.stack)
             this.log.debug(JSON.stringify(cliente))
             this.executeNotifyError(cliente) // Deve enviar uma mensagem explicando o que houve.
@@ -213,7 +214,7 @@ module.exports = {
         const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().setJob(job).create()
         log.trace(`Job Data: ${job.data}`)
 
-        const clientProcessor = new ClientProcessor(log, Queue, {DRY: false, FINAL_REPORT_VERBOSELY: false});
+        const clientProcessor = new ClientProcessor(log, Queue, job, {DRY: false, FINAL_REPORT_VERBOSELY: false});
 
         let USERS_TO_SEARCH = job.data.users.length;
         let USERS_COUNTER = 0;

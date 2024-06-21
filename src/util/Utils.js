@@ -24,9 +24,7 @@ function sha256(x, y = {digest: hex}) {
 
 // Formatar a mensagem do discord
 // formatDiscordMessage(msg, {fake_var: replaced_var...})
-function formatDiscordMessage(message, varMapping) {
-    let LOG_NAME = "FormatDiscordMessage"
-    const log = new Logger(LOG_NAME, false).useEnvConfig().create()
+function formatDiscordMessage(log, message, varMapping) {
     varMapping.game = bombGame() // easter egg
     
     return message.replace(/\\?%\w+%/g, (match) => {

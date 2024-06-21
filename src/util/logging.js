@@ -27,7 +27,7 @@ class Logger {
             },
             info: {
                 level: 3,
-                color: "green"
+                color: "bold green"
             },
             debug: {
                 level: 4,
@@ -42,6 +42,14 @@ class Logger {
                 color: "bold cyan"
             },
         }
+
+        // CRITICAL : Erros graves, que impossibilitam a execução, ou há perda de dados importantes.
+        // ERROR    : Erros que exigem atenção imediata, mas não interrompem a execução do sistema.
+        // WARN     : Erro não-direto, mas que pode causar problemas. Avisos.
+        // INFO     : Eventos úteis, que não indicam problema, apenas para auditoria.
+        // DEBUG    : Informações úteis à depuração.
+        // TRACE    : Informações detalhadas à nível granular. Execução passo-a-passo.
+        // UNIT     : Específicos, testes unitários.
 
         // Adiciona métodos dinâmicos para cada nível de log
         this.addLogMethods();
@@ -230,14 +238,6 @@ class Logger {
     }
 
 }
-
-// CRITICAL : Erros graves, que impossibilitam a execução, ou há perda de dados importantes.
-// ERROR    : Erros que exigem atenção imediata, mas não interrompem a execução do sistema.
-// WARN     : Erro não-direto, mas que pode causar problemas. Avisos.
-// INFO     : Eventos úteis, que não indicam problema, apenas para auditoria.
-// DEBUG    : Informações úteis à depuração.
-// TRACE    : Informações detalhadas à nível granular. Execução passo-a-passo.
-// UNIT     : Específicos, testes unitários.
 
 module.exports = {
     Logger
