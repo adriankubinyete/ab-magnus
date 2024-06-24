@@ -1,6 +1,10 @@
 # base
 FROM node:20-alpine
 
+# fixing timezone
+RUN apk add --no-cache tzdata
+ENV TZ="America/Sao_Paulo"
+
 # node pkgs
 COPY package.json /app/
 
@@ -19,4 +23,4 @@ RUN npm i -g npm-run-all
 
 # run
 # CMD ["tail", "-f", "/dev/null"]
-CMD ["npm", "run", "production"]
+CMD ["npm", "run", "dev:linux"]

@@ -118,10 +118,15 @@ async function sendRequestABS(AXIOS_REQUEST_PARAMS, isJwtRetry = false) {
     return res.data
 }
 
+function envBool(param) {
+    return (String(param).toLowerCase() === 'true');
+}
+
 module.exports = {
     getMagnusBillingClient,
     sha256,
     obtainNewJWT,
     sendRequestABS,
-    formatDiscordMessage
+    formatDiscordMessage,
+    envBool
 }

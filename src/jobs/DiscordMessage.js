@@ -59,6 +59,15 @@ let messages = {
 }
 
 function getMessageForAction(log, job) {
+    if ((job.data.tags.OVERWRITE_MESSAGE)) {
+        return new MessageBuilder()
+        .setTitle(job.data.message.title??'OVERWRITTEN')
+        .setColor(job.data.message.hexColor??'#0000ff')
+        .setURL(job.data.message.url??'')
+        .setThumbnail(job.data.message.thumbnail??'')
+        .setDescription(formatDiscordMessage(log, job.data.message.description??'', job.data))
+    }
+
     let preset = embedTemplate[(job.data.action ?? 'debug')];
     return new MessageBuilder()
     .setTitle(preset.title)
@@ -77,25 +86,37 @@ module.exports = {
         const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().setJob(job).create()
         log.unit(`Job Data: ${JSON.stringify(job.data)}`)
 
+
         // Default values
         job.data._WEBHOOK_URL=process.env.DISCORD_WEBHOOK // REFATORAR: Fiz isso pra implementação de tag, mas vou fazer a implementação de tags uma outra hora, sendo generalista (pra incluir as outras filas se necessário alguma tag nelas)
 
+
         // Runtime
-        log.trace(`Obtendo a embed...`)
-        let embed = getMessageForAction(log, job) // REFATORAR: analisar alguma forma de não necessitar passar job aqui?
-        log.unit(`Embed: ${JSON.stringify(embed)}`)
+        log.trace(`Obtendo a mensagem...`)
+        let message = getMessageForAction(log, job) // REFATORAR: analisar alguma forma de não necessitar passar job aqui?
+        log.unit(`Mensagem a enviar: ${JSON.stringify(message)}`)
 
 
-        log.trace(`Enviando mensagem para o webhook...`)
         if (process.env.SEND_ERRORS_ELSEWHERE) {
+            if (!job.data.action) {
+                log.unit(`No Action included!`)
+                job.data._WEBHOOK_URL=process.env.DISCORD_ERRORS_WEBHOOK
+            }
+
             if (!job.data["action"].includes("Client")) {
                 log.unit(`Action "${job.data.action}" does not include "Client": sending to alternate webhook.`)
                 job.data._WEBHOOK_URL=process.env.DISCORD_ERRORS_WEBHOOK
             }
         }
+        
+
         log.unit(`Webhook URL: ${job.data._WEBHOOK_URL}`)
         const hook = new Webhook(job.data._WEBHOOK_URL);
-        hook.send(embed);
+
+
+        log.trace(`Enviando mensagem para o webhook...`)
+        hook.send(message);
+
 
         job.progress(100);
         done(null, {});

@@ -1,6 +1,6 @@
 const path = require("path");
 const { Logger } = require( path.resolve("src/util/logging") )
-const { getMagnusBillingClient } = require( path.resolve("src/util/Utils") )
+const { envBool, getMagnusBillingClient } = require( path.resolve("src/util/Utils") )
 const { TagValidator } = require( path.resolve("src/util/TagValidator") )
 
 module.exports = {
@@ -9,6 +9,14 @@ module.exports = {
         job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}`;
         const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().setJob(job).create()
         const tagValidator = new TagValidator({}, job, job.data.tags)
+
+        if (envBool(process.env.NOTIFY_DISCORD_WHEN_RUNNING_LIST)) {
+            Queue.add('DiscordMessage', {
+                action: "debug",
+                tags: {originator: job.data._JOB_INTERNAL_ID, OVERWRITE_MESSAGE: true},
+                message: {description: 'Testando'}
+            })
+        }
 
         let mb = getMagnusBillingClient();
         let result = await mb.clients.users.list({limit: 9999});

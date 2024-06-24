@@ -1,6 +1,7 @@
 require("dotenv").config();
 const path = require("path");
 const Queue = require(path.resolve("src/lib/Queue"));
+const { envBool } = require( path.resolve("src/util/Utils") )
 const ROUTES = require(path.resolve('src/express/routing'));
 const { setLogPrefix } = require(path.resolve('src/express/middlewares'));
 const express = require('express');
@@ -9,8 +10,8 @@ const express = require('express');
 const app = express();
 app.use('/', setLogPrefix, ROUTES)
 
-if (!(process.env.PAUSE_PRIMARY_JOB === 'true')) {
-    Queue.add('ListMagnusClients', {originator: "Cron Main_Job", DRY: true}, {repeat: {cron: process.env.PRIMARY_JOB_CRON}})
+if (!(envBool(process.env.PAUSE_PRIMARY_JOB))) {
+    Queue.add('ListMagnusClients', {originator: "Cron Main_Job", DRY: envBool(process.env.DRY_PRIMARY_JOB)}, {repeat: {cron: process.env.PRIMARY_JOB_CRON}})
 }
 
 app.listen(process.env.EXPRESS_PORT, () => {
