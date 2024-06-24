@@ -74,12 +74,9 @@ module.exports = {
     // required: ['originator', 'nome', 'usuario', 'statusAtual', 'statusNovo'], // FEATURE: implementar isso pra todos, eventualmente
     config: {limiter: { max: 5, duration: 5 * 1000 }},
     async handle(job, done, Queue) {
-        job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}:User:${job.data.usuario}`;
+        job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}:User:${job.data.usuario}:${job.data.action??'noActionDetermined'}`;
         const log = new Logger(job.data._JOB_INTERNAL_ID, false).useEnvConfig().setJob(job).create()
         log.unit(`Job Data: ${JSON.stringify(job.data)}`)
-
-        console.log('DISCORDMESSAGE TEST JOB')
-        console.log(job)
 
         // Default values
         job.data._WEBHOOK_URL=process.env.DISCORD_WEBHOOK // REFATORAR: Fiz isso pra implementação de tag, mas vou fazer a implementação de tags uma outra hora, sendo generalista (pra incluir as outras filas se necessário alguma tag nelas)
@@ -91,8 +88,14 @@ module.exports = {
 
 
         log.trace(`Enviando mensagem para o webhook...`)
-        const hook = new Webhook(job.data._WEBHOOK_URL);
+        if (process.env.SEND_ERRORS_ELSEWHERE) {
+            if (!job.data["action"].includes("Client")) {
+                log.unit(`Action "${job.data.action}" does not include "Client": sending to alternate webhook.`)
+                job.data._WEBHOOK_URL=process.env.DISCORD_ERRORS_WEBHOOK
+            }
+        }
         log.unit(`Webhook URL: ${job.data._WEBHOOK_URL}`)
+        const hook = new Webhook(job.data._WEBHOOK_URL);
         hook.send(embed);
 
         job.progress(100);
