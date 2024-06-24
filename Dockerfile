@@ -15,7 +15,8 @@ WORKDIR /app
 
 # install node pkgs
 RUN npm install --verbose
+RUN npm i -g npm-run-all
 
 # run
-CMD ["tail", "-f", "/dev/null"]
-# CMD ["npm", "run", "dev"]
+# CMD ["tail", "-f", "/dev/null"]
+CMD ["npm", "run", "production"]

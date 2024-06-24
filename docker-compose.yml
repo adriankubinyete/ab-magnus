@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     image: phonevox/ab-magnus
     ports:
-    - "${EXPRESS_DOCKER_PORT:-3000}:${EXPRESS_PORT:-3000}"
+    - "${EXPRESS_DOCKER_PORT:-7778}:${EXPRESS_PORT:-3000}"
     env_file:
     - .env
     container_name: ab-magnus
@@ -23,7 +23,7 @@ services:
   redis-server:
     image: redis:6.2.14-alpine
     container_name: ab-redisserver
-    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD:-Redis2024@!}
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD?error}
     restart: always
     volumes: 
     - ./redis-data:/data

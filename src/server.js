@@ -1,6 +1,6 @@
 require("dotenv").config();
 const path = require("path");
-const colors = require("colors");
+const Queue = require(path.resolve("src/lib/Queue"));
 const ROUTES = require(path.resolve('src/express/routing'));
 const { setLogPrefix } = require(path.resolve('src/express/middlewares'));
 const express = require('express');
@@ -10,13 +10,12 @@ const app = express();
 app.use('/', setLogPrefix, ROUTES)
 
 if (!(process.env.PAUSE_PRIMARY_JOB === 'true')) {
-    console.log('adding job')
-    mqList.add({}, {repeat: {cron: HEARTBEAT}})
+    Queue.add('ListMagnusClients', {originator: "Cron Main_Job", DRY: true}, {repeat: {cron: process.env.PRIMARY_JOB_CRON}})
 }
 
 app.listen(process.env.EXPRESS_PORT, () => {
-    console.log(`Server running on http://localhost:${process.env.EXPRESS_PORT}`.yellow)
-    console.info(`Bull Dashboard: http://localhost:${process.env.EXPRESS_PORT}${process.env.BULL_DASHBOARD_ROUTE}`.yellow)
+    console.log(`Server running on http://localhost:${process.env.EXPRESS_PORT}`)
+    console.info(`Bull Dashboard: http://localhost:${process.env.EXPRESS_PORT}${process.env.BULL_DASHBOARD_ROUTE}`)
 })
 
 /* SOURCES

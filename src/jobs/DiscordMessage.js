@@ -48,7 +48,6 @@ let embedTemplate = {
     },
 }
 
-
 let messages = {
     debug: () => {
         return new MessageBuilder()
