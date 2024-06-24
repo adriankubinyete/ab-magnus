@@ -14,7 +14,7 @@ module.exports = {
             Queue.add('DiscordMessage', {
                 action: "debug",
                 tags: {originator: job.data._JOB_INTERNAL_ID, OVERWRITE_MESSAGE: true},
-                message: {description: 'Testando'}
+                message: {title: job.data._JOB_INTERNAL_ID, description: 'Job is running.', thumbnail: "https://www.icegif.com/wp-content/uploads/2022/06/icegif-340.gif"}
             })
         }
 
