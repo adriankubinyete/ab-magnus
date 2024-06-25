@@ -1,5 +1,5 @@
 ## Contextualização
-Este projeto tem em mente uma necessidade emergente em nossa empresa: Utilizamos dois sistemas, o [IXCSoft](https://ixcsoft.com/), para controle interno de clientes, cobranças, chamadoas, dentre outras features relevantes.
+Este projeto tem em mente uma necessidade emergente em nossa empresa: Utilizamos dois sistemas, o [IXCSoft](https://ixcsoft.com/), para controle interno de clientes, cobranças, chamados, dentre outras features relevantes.
 e, irrelacionado com o IXCSoft, também provemos linhas telefônicas através do software opensource [MagnusBilling](https://www.magnusbilling.org/) ([repositório](https://github.com/magnussolution/magnusbilling7)), para ligações PASSIVAS (entrada) e ATIVAS (saída).
 Diversos de nossos clientes acabam não pagando as faturas de seus contratos, e os mesmos acabam sendo bloqueados através do nosso sistema de controle de clientes, o IXCSoft.
 Entretanto, mesmo com o contrato bloqueado, os mesmos ainda conseguem usufruir dos serviços sem problemas, devido à falta de integração entre o IXCSoft e o MagnusBilling que atenda a esta necessidade específica de nossa empresa.
@@ -24,12 +24,28 @@ Evitar utilização indevida de nossos serviços.
 Informação interna através das mensagens no Discord.
 
 ## Outras informações
-Docker: `version 25.0.3, build 4debf41` (dev-environment)
-docker-compose: `version v2.24.6-desktop.1` (dev-environment)
-NodeJS: `v16.20.2` (dev-environment)
+- Docker: `version 25.0.3, build 4debf41` (dev-environment)
+- docker-compose: `version v2.24.6-desktop.1` (dev-environment)
+- NodeJS: `v16.20.2` (dev-environment)
 
 ## Quickstart
-<to-do>
+- Clone o repositório. Este repositório utiliza um repositório secundário "magnusbilling-node" para as requisições ao MagnusBilling, portanto a necessidade do `--recurse-submodules`
+```bash
+git clone --recurse-submodules https://github.com/adriankubinyete/ab-magnus
+```
+
+- Acesse a pasta clonada do repositório.
+```bash
+cd ./ab-magnus
+```
+- Crie e edite um arquivo ".env", baseando-se no arquivo ".env.example". É recomendado copiar ".env.example", renomeá-lo, e editar seu conteúdo.
+
+- Suba os contêineres `ab-redisserver` e `ab-magnus` com docker-composer.
+`docker-compose up -d --build`
+
+- Consulte se os contêineres subiram com sucesso.
+`docker ps`
+`docker logs -f ab-magnus`
 
 ## Bull Dashboard
 O endpoint para acesso à dashboard do Bull pode ser editado através do parâmetro `BULL_DASHBOARD_ROUTE`, por padrão sendo configurado como `/admin/queues`, podendo ser acessado em `localhost:3000/admin/queues`, sendo localhost o endereço do servidor que está rodando o serviço, e 3000 sendo a porta mapeada do Express.
