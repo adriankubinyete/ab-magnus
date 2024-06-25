@@ -23,4 +23,4 @@ RUN npm i -g npm-run-all
 
 # run
 # CMD ["tail", "-f", "/dev/null"]
-CMD ["npm", "run", "dev:linux"]
+CMD ["npm", "run", "production"]

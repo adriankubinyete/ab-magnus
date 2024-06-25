@@ -19,6 +19,7 @@ services:
     - redis-server
     volumes:
     - ./docker-logs/:/app/logs
+    - ./docker-npm/:/app/logs
 
   redis-server:
     image: redis:6.2.14-alpine
