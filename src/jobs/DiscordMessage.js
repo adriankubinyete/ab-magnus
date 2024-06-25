@@ -79,7 +79,7 @@ function getMessageForAction(log, job) {
 
 module.exports = {
     key: 'DiscordMessage',
-    // required: ['originator', 'nome', 'usuario', 'statusAtual', 'statusNovo'], // FEATURE: implementar isso pra todos, eventualmente
+    // required: ['ORIGINATOR', 'nome', 'usuario', 'statusAtual', 'statusNovo'], // FEATURE: implementar isso pra todos, eventualmente
     config: {limiter: { max: 5, duration: 5 * 1000 }},
     async handle(job, done, Queue) {
         job.data._JOB_INTERNAL_ID = `${module.exports.key}:${job.id}:User:${job.data.usuario}:${job.data.action??'noActionDetermined'}`;

@@ -13,7 +13,7 @@ module.exports = {
         if (envBool(process.env.NOTIFY_DISCORD_WHEN_RUNNING_LIST)) {
             Queue.add('DiscordMessage', {
                 action: "debug",
-                tags: {originator: job.data._JOB_INTERNAL_ID, OVERWRITE_MESSAGE: true},
+                tags: {ORIGINATOR: job.data._JOB_INTERNAL_ID, OVERWRITE_MESSAGE: true},
                 message: {title: job.data._JOB_INTERNAL_ID, description: 'Job is running.', thumbnail: "https://www.icegif.com/wp-content/uploads/2022/06/icegif-340.gif"}
             })
         }
@@ -105,7 +105,7 @@ module.exports = {
             // console.log(`DRY: absqFind.add(${hasContract}, ${doesntHaveContract})`)
             const { isActive, isInactive, isBlocked, ...filteredHasContract } = hasContract;
             Queue.add('SearchContracts', {
-                tags: {originator: job.data._JOB_INTERNAL_ID},
+                tags: {ORIGINATOR: job.data._JOB_INTERNAL_ID},
                 users: {...filteredHasContract},
             } );
 

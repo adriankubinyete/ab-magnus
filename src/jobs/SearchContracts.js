@@ -188,7 +188,7 @@ class ClientProcessor {
             const executeAction = this.getAction(cliente.statusMagnus, cliente.statusIxc);
             
             // Executando a ação de fato
-            let OUTPUT_DATA = {tags: {originator: this.job.data._JOB_INTERNAL_ID}, users: [cliente]}
+            let OUTPUT_DATA = {tags: {ORIGINATOR: this.job.data._JOB_INTERNAL_ID}, users: [cliente]}
             executeAction(OUTPUT_DATA)
         } catch (error) {
             this.log.error(`Um erro ocorreu ao processar o cliente "${cliente.nome}" (${cliente.usuario}): ${error}`)
@@ -200,7 +200,7 @@ class ClientProcessor {
 }
 
 function keyShouldBeIgnored(key) {
-    let KEYS_TO_IGNORE = ['originator']
+    let KEYS_TO_IGNORE = ['ORIGINATOR']
     if (KEYS_TO_IGNORE.includes(key)) { 
         return true;
     };

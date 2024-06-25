@@ -54,7 +54,7 @@ Segue alguns exemplos:
   "queue": "ListMagnusClients",
   "data": {
     "tags": {
-      "originator": "API",
+      "ORIGINATOR": "API",
       "DRY": true
     }
   },
@@ -72,7 +72,7 @@ Segue alguns exemplos:
   "queue": "SearchContracts",
   "data": {
     "tags": {
-        "originator": "API"
+        "ORIGINATOR": "API"
     },
     "users": {
       "<USUARIO>": {
