@@ -40,7 +40,7 @@ Segue alguns exemplos:
 
 - Obliterar as informações de uma fila
 ```json
-/bull/queues/obliterate
+DELETE /bull/queues/obliterate
 {
   "queue": ["SearchContracts","ListMagnusClients","EnableClient","DisableClient","BlockClient","DiscordMessage","UnblockClient"],
   "config": {"force": true}
@@ -49,7 +49,7 @@ Segue alguns exemplos:
 
 - Adicionando um trabalho de listagem (coleta todos usuários do Magnus, e efetua a consulta de cada um para bloquear, desbloquear, etc...)
 ```json
-/bull/queues/add
+POST /bull/queues/add
 {
   "queue": "ListMagnusClients",
   "data": {
@@ -67,7 +67,7 @@ Segue alguns exemplos:
 
 - Adicionando um trabalho de atualização para um cliente específico
 ```json
-/bull/queues/add
+POST /bull/queues/add
 {
   "queue": "SearchContracts",
   "data": {
