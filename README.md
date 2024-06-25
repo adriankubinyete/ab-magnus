@@ -41,11 +41,15 @@ cd ./ab-magnus
 - Crie e edite um arquivo ".env", baseando-se no arquivo ".env.example". É recomendado copiar ".env.example", renomeá-lo, e editar seu conteúdo.
 
 - Suba os contêineres `ab-redisserver` e `ab-magnus` com docker-composer.
-`docker-compose up -d --build`
+```bash
+docker-compose up -d --build
+```
 
 - Consulte se os contêineres subiram com sucesso.
-`docker ps`
-`docker logs -f ab-magnus`
+```bash
+docker ps
+docker logs -f ab-magnus
+```
 
 ## Bull Dashboard
 O endpoint para acesso à dashboard do Bull pode ser editado através do parâmetro `BULL_DASHBOARD_ROUTE`, por padrão sendo configurado como `/admin/queues`, podendo ser acessado em `localhost:3000/admin/queues`, sendo localhost o endereço do servidor que está rodando o serviço, e 3000 sendo a porta mapeada do Express.
