@@ -1,8 +1,6 @@
 .env
-logs/*
-docker-logs/*
-docker-logs/
 node_modules/
 logs/
-redis-data/*
+docker-logs/
 redis-data/
+docker-npm/

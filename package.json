@@ -11,9 +11,9 @@
     "lin:dev:server": "nodemon src/server.js",
     "lin:dev:queue": "nodemon src/queue.js",
 
-    "production": "npm-run-all lin:prod:*",
-    "lin:prod:server": "nodemon src/server.js",
-    "lin:prod:queue": "nodemon src/queue.js"
+    "prod": "npm-run-all -p lin:prod:*",
+    "lin:prod:server": "node src/server.js",
+    "lin:prod:queue": "node src/queue.js"
     
   },
   "dependencies": {
