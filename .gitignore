@@ -2,7 +2,6 @@
 logs/*
 docker-logs/*
 docker-logs/
-src/lib/magnusbilling-node/
 node_modules/
 logs/
 redis-data/*
