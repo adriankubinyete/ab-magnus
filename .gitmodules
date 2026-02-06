@@ -1,3 +1,0 @@
-[submodule "src/lib/magnusbilling-node"]
-	path = src/lib/magnusbilling-node
-	url = https://github.com/adriankubinyete/magnusbilling-node.git
