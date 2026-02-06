@@ -1,6 +1,3 @@
-import amqp from 'amqplib';
-import amqpConnManager from 'amqp-connection-manager';
-
 export const RABBIT_URL = process.env.RABBITMQ_URL || "amqp://localhost:5672";
 export const PREFIX = process.env.RABBITMQ_PREFIX + '.' || 'abm.';
 
