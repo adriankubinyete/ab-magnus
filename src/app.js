@@ -1,6 +1,7 @@
-import { initProducer } from "./producers/status-change.producer";
-import { startStatusUpdater } from "./consumers/status-updater.consumer";
-import { startPolling } from "./schedulers/poll-ixc.scheduler";
+import 'dotenv/config';
+import { initProducer } from "./producers/status-change.producer.js";
+import { startStatusUpdater } from "./consumers/status-updater.consumer.js";
+import { startPolling } from "./schedulers/status-sync.scheduler.js";
 
 async function bootstrap() {
     await initProducer();

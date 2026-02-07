@@ -1,28 +1,45 @@
-// src/config/status-map.js
-export const STATUS_MAP_IXC_TO_MAGNUS = {
-  // Baseado em status principal (prioridade alta)
-  'P': 1,  // Pré-contrato → ativo no Magnus (ou 0, dependendo da regra)
-  'A': 1,  // Ativo → ativo
-  'I': 4,  // Inativo → bloqueado
-  'N': 4,  // Negativado → bloqueado
-  'D': 4,  // Desistiu → bloqueado
+export const CLIENT_STATUS = {
+  INACTIVE: 0,
+  ACTIVE: 1,
+  BLOCKED: 4
+}
 
-  // Se quiser sobrepor usando status_internet (mais granular)
-  // status_internet tem precedência se definido
+export const STATUS_MAP_IXC_TO_MAGNUS = {
+  status: {
+    'P': CLIENT_STATUS.ACTIVE,  // Pré-contrato → ativo no Magnus (ou 0, dependendo da regra)
+    'A': CLIENT_STATUS.ACTIVE,  // Ativo → ativo
+    'I': CLIENT_STATUS.INACTIVE,  // Inativo → bloqueado
+    'N': CLIENT_STATUS.BLOCKED,  // Negativado → bloqueado
+    'D': CLIENT_STATUS.INACTIVE,  // Desistiu → bloqueado
+  },
   status_internet: {
-    'A': 1,
-    'D': 4,
-    'CM': 4,
-    'CA': 4,
-    'FA': 4,
-    'AA': 4,
+    'A': CLIENT_STATUS.ACTIVE,
+    'D': CLIENT_STATUS.BLOCKED,
+    'CM': CLIENT_STATUS.BLOCKED,
+    'CA': CLIENT_STATUS.BLOCKED,
+    'FA': CLIENT_STATUS.BLOCKED,
+    'AA': CLIENT_STATUS.BLOCKED,
   }
-};
+}
 
 export function getMagnusActiveFromIxc(contract) {
-  // Prioridade: status_internet > status principal
-  if (contract.status_internet && contract.status_internet in STATUS_MAP_IXC_TO_MAGNUS.status_internet) {
+  const statusFromIxc =
+    STATUS_MAP_IXC_TO_MAGNUS.status[contract.status] ?? CLIENT_STATUS.INACTIVE;
+
+  // se o contrato nao tiver ativo, vai pelo valor do contrato
+  if (statusFromIxc !== CLIENT_STATUS.ACTIVE) {
+    return statusFromIxc;
+  }
+
+  // se o contrato estiver ativo, vai pelo valor de status_internet (representa basicamente a conexão)
+  if (
+    contract.status_internet &&
+    contract.status_internet in STATUS_MAP_IXC_TO_MAGNUS.status_internet
+  ) {
     return STATUS_MAP_IXC_TO_MAGNUS.status_internet[contract.status_internet];
   }
-  return STATUS_MAP_IXC_TO_MAGNUS[contract.status] ?? 1; // default ativo se desconhecido
+
+  // n bateu em nenhum mapping = defaulta pra bloqueado
+  console.log('no mapping found for contract', contract);
+  return CLIENT_STATUS.BLOCKED;
 }

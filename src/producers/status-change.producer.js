@@ -1,4 +1,6 @@
-import { getConnection, EXCHANGES, setupTopology } from "../config/rabbit";
+import { EXCHANGES } from "../config/rabbit.js";
+import { getConnection, setupTopology } from "../lib/rabbit/connection.js";
+import crypto from 'node:crypto';
 
 let channelWrapper = null;
 
@@ -13,20 +15,54 @@ export async function initProducer() {
     });
 }
 
+/*
+changes.push({
+    contract: contract.id,
+    from: currentStatus,
+    to: targetStatus,
+    _meta: {
+        contract: {
+            id: contract.id,
+            status: contract.status,
+            status_internet: contract.status_internet,
+        },
+        magnus: {
+            userId: magnusData.id,
+            userStatus: magnusData.status,
+            name: magnusData.name,
+        }
+    },
+});
+*/
+
 export async function publishStatusChange(change) {
     if (!channelWrapper) throw new Error('Producer not initialized');
 
-    const { contractId, newStatus, changedAt } = change;
+    const payload = {
+        id: crypto.randomUUID(),
+        occurredAt: new Date().toISOString(),
+        data: {
+            magnusUserId: change._meta.magnus.userId,
+            contractId: change.contract,
+            fromStatus: change.from,
+            toStatus: change.to,
+        },
+        _meta: {
+            magnusUser: change._meta.magnus.name,
+            ixcStatus: change._meta.contract.status_internet,
+            source: 'status-change.producer'
+        }
+    }
 
-    await channelWrapper.sendToQueue(
-        '', // to exchange
-        EXCHANGES.STATUS_CHANGES,
-        { contractId, newStatus, changedAt, attempt: 1 },
+    const routingKey = `contract.${payload.data.contractId}.status`;
+    await channelWrapper.publish(
+        EXCHANGES.STATUS_CHANGED,
+        routingKey,
+        { ...payload, attempt: 1 },
         {
             persistent: true,
-            messageId: `${contractId}-${newStatus}-${changedAt}`, // idempotency
+            messageId: payload.id,
             headers: { 'x-retries': 0 },
-            routingKey: `contract.${contractId}.status`,
         }
     );
 }
