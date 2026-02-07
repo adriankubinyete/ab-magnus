@@ -144,3 +144,10 @@ export async function getStatusChanges() {
   console.log(`Processed ${magnusIndex.size} users. ${changes.length} requires status changes.`);
   return changes;
 }
+
+export async function updateMagnusUserStatus(userId, newStatus) {
+  console.log(`Updating Magnus user ${userId} status to ${newStatus}`);
+  // const res = await magnus.updateUserStatus(userId, newStatus);
+  // return res;
+  return null;
+}

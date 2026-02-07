@@ -1,6 +1,6 @@
 import { QUEUES, EXCHANGES } from "../config/rabbit.js";
 import { getConnection, setupTopology } from "../lib/rabbit/connection.js";
-// import { updateMagnusStatus, getCurrentMagnusStatus } from "../services/status-sync.service.js";
+import { updateMagnusUserStatus } from "../services/status-sync.service.js";
 
 //RABBITMQ_CONSUMER_MAX_RETRIES
 const MAX_RETRIES = Number(process.env.RABBITMQ_CONSUMER_MAX_RETRIES || 3);
@@ -24,22 +24,21 @@ export async function startStatusUpdater() {
 
                     const {
                         contractId,
-                        newStatus,
+                        magnusUserId,
+                        fromStatus,
+                        toStatus,
                     } = payload.data;
-
-                    const retries =
-                        Number(msg.properties.headers?.['x-retries'] || 0);
+                    console.log(`Processing contract ${contractId}`);
 
                     // idempotency
-                    console.log(`Processing contract ${payload?.data?.contractId}`);
-                    const current = await getCurrentMagnusStatus(contractId);
-                    if (current === mapToMagnusStatus(newStatus)) {
-                        channel.ack(msg);
-                        return;
-                    }
+                    // const current = await getCurrentMagnusStatus(contractId);
+                    // if (current === magnus(newStatus)) {
+                    //     channel.ack(msg);
+                    //     return;
+                    // }
 
-                    console.log(`Updating contract ${payload?.data?.contractId}`);
-                    await updateMagnusStatus(contractId, newStatus);
+                    console.log(`Updating contract ${contractId} from ${fromStatus} to ${toStatus}`);
+                    await updateMagnusUserStatus(magnusUserId, toStatus);
 
                     channel.ack(msg);
                 } catch (err) {

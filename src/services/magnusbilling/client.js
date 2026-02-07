@@ -196,6 +196,10 @@ export class MagnusBillingClient {
         return this.read('user', page, undefined, limit);
     }
 
+    async updateUserStatus(userId, newStatus) {
+        return this.update('user', userId, { active: newStatus });
+    }
+
     async getFields(module) {
         return this.#query({ module, getFields: 1 });
     }
