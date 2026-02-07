@@ -85,7 +85,6 @@ export class MagnusBillingClient {
         };
 
         const url = `${this.baseUrl}/index.php/${params.module || ''}/${params.action || ''}`;
-        console.log('final url:', url);
 
         try {
             const response = await this.axios.post(url, postData, { headers });
@@ -100,25 +99,49 @@ export class MagnusBillingClient {
                 return JSON.parse(response.data);
             } catch {
                 console.error('Non-JSON response:', response.data);
-                throw new Error('API Response is not a valid JSON.');
+                throw new Error('MagnusBilling response is not a valid JSON.');
             }
         } catch (error) {
             if (error.response) {
-                // Erro HTTP (4xx, 5xx)
                 const status = error.response.status;
-                let message = error.response.data?.message || error.message;
+                let message = 'Erro desconhecido na resposta da API';
 
-                if (typeof error.response.data === 'string') {
-                    try {
-                        const parsed = JSON.parse(error.response.data);
-                        message = parsed.message || parsed.error || error.response.data;
-                    } catch { }
+                if (error.response.data) {
+                    if (typeof error.response.data === 'object' && error.response.data.message) {
+                        message = error.response.data.message;
+                    } else if (typeof error.response.data === 'string') {
+                        try {
+                            const parsed = JSON.parse(error.response.data);
+                            message = parsed.message || parsed.error || error.response.data;
+                        } catch {
+                            message = error.response.data;
+                        }
+                    }
                 }
 
-                throw new Error(`API error ${status}: ${message}`);
+                const err = new Error(`MagnusBillingClient: API error ${status}: ${message}`);
+                err.status = status;
+                throw err;
             }
 
-            throw error; // Erro de rede, timeout, etc
+            if (error.code) {
+
+                if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+                    const err = new Error('MagnusBillingClient: Request timed out.');
+                    throw err;
+                }
+
+                if (error.code === 'ERR_NETWORK' ||
+                    error.message.includes('Network Error') ||
+                    error.code === 'ENOTFOUND' ||
+                    error.code === 'ERR_NAME_NOT_RESOLVED') {
+                    const err = new Error('MagnusBillingClient: Network unavailable or server unreachable.');
+                    throw err;
+                }
+            }
+
+            const err = new Error(`MagnusBillingClient: Unknown error: ${error.code} - ${error.message}`);
+            throw err;
         }
     }
 
