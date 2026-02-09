@@ -146,7 +146,7 @@ export async function getStatusChanges() {
 }
 
 export async function updateMagnusUserStatus(userId, newStatus) {
-  console.log(`Updating Magnus user ${userId} status to ${newStatus}`);
+  console.log(`[FAKE] Updating Magnus user ${userId} status to ${newStatus}`);
   // const res = await magnus.updateUserStatus(userId, newStatus);
   // return res;
   return null;

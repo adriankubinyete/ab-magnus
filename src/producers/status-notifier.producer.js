@@ -1,4 +1,4 @@
-import { EXCHANGES } from "../config/rabbit.js";
+import { EXCHANGES, PREFIX } from "../config/rabbit.js";
 import { getConnection, setupTopology } from "../lib/rabbit/connection.js";
 import crypto from "node:crypto";
 
@@ -35,17 +35,12 @@ export async function publishStatusNotification({
             toStatus,
             attempt,
             success,
-        }
+        },
     };
 
-    const routingKey = success
-        ? `${EXCHANGES.STATUS_SYNCED}.succeeded`
-        : `${EXCHANGES.STATUS_SYNCED}.failed"`
-
-    console.log(`Sending payload to ${routingKey}`);
     await channelWrapper.publish(
         EXCHANGES.STATUS_SYNCED,
-        routingKey,
+        `${PREFIX}notify.delayed`,
         payload,
         {
             persistent: true,

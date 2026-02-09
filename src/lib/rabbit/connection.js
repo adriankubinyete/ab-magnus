@@ -1,6 +1,6 @@
 import amqpConnManager from 'amqp-connection-manager';
 import amqp from 'amqplib';
-import { RABBIT_URL, EXCHANGES, QUEUES } from '../../config/rabbit.js';
+import { RABBIT_URL, EXCHANGES, QUEUES, PREFIX } from '../../config/rabbit.js';
 
 export async function getConnection() {
     console.log('Connecting to RabbitMQ...');
@@ -77,10 +77,25 @@ export async function setupTopology(channel) {
         durable: true,
     });
 
+    await channel.assertQueue(QUEUES.STATUS_NOTIFY_DELAYED, {
+        durable: true,
+        arguments: {
+            'x-message-ttl': 1500, // 1.5s entre mensagens
+            'x-dead-letter-exchange': EXCHANGES.STATUS_SYNCED,
+            'x-dead-letter-routing-key': `${PREFIX}notify`,
+        },
+    });
+
+    await channel.bindQueue(
+        QUEUES.STATUS_NOTIFY_DELAYED,
+        EXCHANGES.STATUS_SYNCED,
+        `${PREFIX}notify.delayed`
+    );
+
     await channel.bindQueue(
         QUEUES.STATUS_NOTIFY,
         EXCHANGES.STATUS_SYNCED,
-        `${EXCHANGES.STATUS_SYNCED}.*`
+        `${PREFIX}notify`
     );
 
 }

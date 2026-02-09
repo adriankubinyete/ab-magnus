@@ -1,8 +1,7 @@
 import { EXCHANGES, QUEUES } from "../config/rabbit.js";
 import { CLIENT_STATUS } from "../config/status-map.js";
 import { getConnection, setupTopology } from "../lib/rabbit/connection.js";
-// import { sendDiscordMessage } from "../services/discord.service.js";
-import webhook from "../services/discord/webhook-instance.js";
+import { sendNotification } from "../services/discord-notify.service.js";
 
 //RABBITMQ_CONSUMER_MAX_RETRIES
 const MAX_RETRIES = Number(process.env.RABBITMQ_CONSUMER_MAX_RETRIES || 3);
@@ -52,23 +51,13 @@ export async function startStatusNotifierConsumer() {
                             success,
                         } = data;
 
-                        // 👉 regra: só notifica falha definitiva
                         const action = classifyStatusChange(fromStatus, toStatus);
-
-                        console.log(`Contrato: ${contractId} Ação: ${action} `)
-                        if (success) {
-                            webhook.sendEmbed({
-                                
-
-                            })
-                            channel.ack(msg);
-                            return;
-                        }
-
-                        if (attempt < MAX_RETRIES) {
-                            channel.ack(msg);
-                            return;
-                        }
+                        // this is dynamic, every key-value sent here goes to final message
+                        await sendNotification({
+                            type: action,
+                            Nome: name,
+                            Contrato: contractId,
+                        });
 
                         channel.ack(msg);
                     } catch (err) {

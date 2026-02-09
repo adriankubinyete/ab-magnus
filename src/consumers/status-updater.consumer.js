@@ -43,7 +43,6 @@ export async function startStatusUpdaterConsumer() {
                     console.log(`Updating contract ${contractId} from ${fromStatus} to ${toStatus}`);
                     await updateMagnusUserStatus(magnusUserId, toStatus);
 
-                    console.log(`Sending notification about contract ${contractId} status change`);
                     await publishStatusNotification({
                         name: payload._meta.magnusUser,
                         contractId,

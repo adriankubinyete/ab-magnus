@@ -12,4 +12,5 @@ export const QUEUES = {
     STATUS_UPDATE_RETRY: `${PREFIX}status.update.retry`,
     STATUS_UPDATE_DLQ: `${PREFIX}status.update.dlq`,
     STATUS_NOTIFY: `${PREFIX}status.notify`,
+    STATUS_NOTIFY_DELAYED: `${PREFIX}status.notify.delayed`,
 }
