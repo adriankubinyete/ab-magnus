@@ -4,12 +4,13 @@ import { startStatusUpdaterConsumer } from "./consumers/status-updater.consumer.
 import { startPolling } from "./schedulers/status-sync.scheduler.js";
 import { initStatusNotifierProducer } from './producers/status-notifier.producer.js';
 import { startStatusNotifierConsumer } from './consumers/status-notifier.consumer.js';
-import { runStatusSync } from './jobs/status-sync.job.js';
+import { startHttpServer } from './http-server.js';
 
 const args = process.argv.slice(2);
 
 const hasProduce = args.includes('--producer');
 const consumeIndex = args.indexOf('--consumer');
+const hasHttp = args.includes('--http');
 
 let consumeMode = null; // 'all' | 'sync' | 'notify'
 
@@ -46,8 +47,12 @@ async function bootstrap() {
     }
   }
 
+  if (hasHttp) {
+    startHttpServer();
+  }
+
   if (!hasProduce && !consumeMode) {
-    console.warn('> [!] nothing to start (use --consume and/or --produce)');
+    console.warn('> [!] nothing to start (use --producer, --consumer, or --http)');
   }
 }
 
