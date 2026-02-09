@@ -134,7 +134,8 @@ export class MagnusBillingClient {
                 if (error.code === 'ERR_NETWORK' ||
                     error.message.includes('Network Error') ||
                     error.code === 'ENOTFOUND' ||
-                    error.code === 'ERR_NAME_NOT_RESOLVED') {
+                    error.code === 'ERR_NAME_NOT_RESOLVED' ||
+                    error.code === 'EHOSTUNREACH' ) {
                     const err = new Error('MagnusBillingClient: Network unavailable or server unreachable.');
                     throw err;
                 }

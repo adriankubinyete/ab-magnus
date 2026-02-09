@@ -68,4 +68,19 @@ export async function setupTopology(channel) {
         EXCHANGES.DLX,
         'dead'
     );
+
+    await channel.assertExchange(EXCHANGES.STATUS_SYNCED, "topic", {
+        durable: true,
+    });
+
+    await channel.assertQueue(QUEUES.STATUS_NOTIFY, {
+        durable: true,
+    });
+
+    await channel.bindQueue(
+        QUEUES.STATUS_NOTIFY,
+        EXCHANGES.STATUS_SYNCED,
+        `${EXCHANGES.STATUS_SYNCED}.*`
+    );
+
 }

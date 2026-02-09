@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 
 let channelWrapper = null;
 
-export async function initProducer() {
+export async function initStatusChangeProducer() {
     const conn = await getConnection();
 
     channelWrapper = conn.createChannel({

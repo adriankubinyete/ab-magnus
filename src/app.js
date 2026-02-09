@@ -1,11 +1,11 @@
 import 'dotenv/config';
-import { initProducer } from "./producers/status-change.producer.js";
-import { startStatusUpdater } from "./consumers/status-updater.consumer.js";
+import { initStatusChangeProducer } from "./producers/status-change.producer.js";
+import { startStatusUpdaterConsumer } from "./consumers/status-updater.consumer.js";
 import { startPolling } from "./schedulers/status-sync.scheduler.js";
 
 async function bootstrap() {
-    await initProducer();
-    startStatusUpdater(); // can run multiple processes/workers
+    await initStatusChangeProducer();
+    startStatusUpdaterConsumer(); // can run multiple processes/workers
     startPolling();
     console.log('App started.');
 }

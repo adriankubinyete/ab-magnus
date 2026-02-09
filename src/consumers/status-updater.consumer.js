@@ -1,11 +1,12 @@
 import { QUEUES, EXCHANGES } from "../config/rabbit.js";
 import { getConnection, setupTopology } from "../lib/rabbit/connection.js";
+import { publishStatusNotification } from "../producers/status-notifier.producer.js";
 import { updateMagnusUserStatus } from "../services/status-sync.service.js";
 
 //RABBITMQ_CONSUMER_MAX_RETRIES
 const MAX_RETRIES = Number(process.env.RABBITMQ_CONSUMER_MAX_RETRIES || 3);
 
-export async function startStatusUpdater() {
+export async function startStatusUpdaterConsumer() {
     const conn = await getConnection();
 
     conn.createChannel({
@@ -18,6 +19,8 @@ export async function startStatusUpdater() {
                 if (!msg) return;
 
                 let payload;
+                let retries = (msg.properties.headers?.['x-retries'] || 0);
+                const attempt = retries + 1;
 
                 try {
                     payload = JSON.parse(msg.content.toString());
@@ -40,13 +43,22 @@ export async function startStatusUpdater() {
                     console.log(`Updating contract ${contractId} from ${fromStatus} to ${toStatus}`);
                     await updateMagnusUserStatus(magnusUserId, toStatus);
 
+                    console.log(`Sending notification about contract ${contractId} status change`);
+                    await publishStatusNotification({
+                        name: payload._meta.magnusUser,
+                        contractId,
+                        fromStatus,
+                        toStatus,
+                        attempt,
+                        success: true,
+                    });
+
                     channel.ack(msg);
                 } catch (err) {
-                    const retries =
-                        Number(msg.properties.headers?.['x-retries'] || 0) + 1;
+                    retries = retries + 1;
 
                     console.error(
-                        `Failed to update contract ${payload?.data?.contractId}, attempt ${retries}`,
+                        `Failed to update contract ${payload?.data?.contractId}, attempt ${attempt}`,
                         err
                     );
 
