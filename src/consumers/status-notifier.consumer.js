@@ -2,6 +2,7 @@ import { EXCHANGES, QUEUES } from "../config/rabbit.js";
 import { CLIENT_STATUS } from "../config/status-map.js";
 import { getConnection, setupTopology } from "../lib/rabbit/connection.js";
 // import { sendDiscordMessage } from "../services/discord.service.js";
+import webhook from "../services/discord/webhook-instance.js";
 
 //RABBITMQ_CONSUMER_MAX_RETRIES
 const MAX_RETRIES = Number(process.env.RABBITMQ_CONSUMER_MAX_RETRIES || 3);
@@ -56,6 +57,10 @@ export async function startStatusNotifierConsumer() {
 
                         console.log(`Contrato: ${contractId} Ação: ${action} `)
                         if (success) {
+                            webhook.sendEmbed({
+                                
+
+                            })
                             channel.ack(msg);
                             return;
                         }
