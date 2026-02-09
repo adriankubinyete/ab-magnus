@@ -8,8 +8,8 @@ import { runStatusSync } from './jobs/status-sync.job.js';
 
 const args = process.argv.slice(2);
 
-const hasProduce = args.includes('--produce');
-const consumeIndex = args.indexOf('--consume');
+const hasProduce = args.includes('--producer');
+const consumeIndex = args.indexOf('--consumer');
 
 let consumeMode = null; // 'all' | 'sync' | 'notify'
 
