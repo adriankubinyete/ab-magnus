@@ -6,9 +6,11 @@ pnpm start [--consumer] [--producer]
 
 ## Flags:
 
-- --producer<br>Periodically polls 'IXC/MAGNUS' and publishes status change events to 'RabbitMQ'.
+- --producer<br>Periodically polls IxcSoft and MagnusBilling, and publishes status change events to RabbitMQ.
 
-- --consumer<br>Consumes events from 'RabbitMQ': synchronizes data and sends notifications
+- --consumer<br>Consumes events from RabbitMQ: synchronizes data and sends notifications
+
+- --http<br>Opens an http server to allow for manual triggering of the sync event, which sends changes to RabbitMQ the queue. _Still requires consumers to process the queues._
 
 ## Examples
 
