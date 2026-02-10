@@ -27,7 +27,7 @@ function getMsUntilNextTick(intervalMinutes) {
 
 export function startPolling() {
     const intervalMinutes =
-        Number(process.env.POLL_RATE_MINUTES) || 30;
+        Number(process.env.POLLING_RATE_MINUTES) || 30;
 
     console.log(
         `Starting status sync scheduler (every ${intervalMinutes} minutes)`

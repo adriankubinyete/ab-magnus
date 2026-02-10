@@ -1,5 +1,6 @@
 import express from 'express';
 import { runStatusSync } from './jobs/status-sync.job.js';
+import { initStatusChangeProducer } from './producers/status-change.producer.js';
 
 export function startHttpServer() {
     const app = express();
@@ -15,11 +16,12 @@ export function startHttpServer() {
         try {
             console.log('> HTTP sync triggered');
 
+            await initStatusChangeProducer();
             const changes = await runStatusSync();
 
             res.json({
                 ok: true,
-                message: 'Status sync executed, changes published: ' + changes,
+                message: 'Status sync executed, changes published: ' + changes.length,
             });
         } catch (err) {
             console.error('❌ Sync failed', err);

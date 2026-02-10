@@ -4,18 +4,30 @@ const NOTIFICATION_SETTINGS = {
     BLOCKED: {
         title: 'NOTIFICAÇÃO DE BLOQUEIO',
         color: 0xff3b3b,
+        thumbnail: {
+            url: 'https://em-content.zobj.net/source/twitter/103/lock_1f512.png'
+        }
     },
     UNBLOCKED: {
         title: 'NOTIFICAÇÃO DE DESBLOQUEIO',
         color: 0x00c950,
+        thumbnail: {
+            url: 'https://em-content.zobj.net/source/twitter/450/unlocked_1f513.png'
+        }
     },
     ACTIVATED: {
         title: 'NOTIFICAÇÃO DE ATIVAÇÃO',
         color: 0x3b82f6,
+        thumbnail: {
+            url: 'https://em-content.zobj.net/source/toss-face/381/check-mark-button_2705.png'
+        }
     },
     DEACTIVATED: {
         title: 'NOTIFICAÇÃO DE DESATIVAÇÃO',
         color: 0xf97316,
+        thumbnail: {
+            url: 'https://em-content.zobj.net/source/toss-face/381/cross-mark-button_274e.png'
+        },
     },
 };
 
