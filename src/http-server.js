@@ -16,7 +16,6 @@ export function startHttpServer() {
         try {
             console.log('> HTTP sync triggered');
 
-            await initStatusChangeProducer();
             const changes = await runStatusSync();
 
             res.json({

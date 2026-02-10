@@ -1,5 +1,5 @@
-import { getStatusChanges } from "../services/status-sync.service.js";
-import { publishStatusChange } from "../producers/status-change.producer.js";
+import { initStatusChangeProducer } from "../producers/status-change.producer.js";
+import { runStatusSync } from "../jobs/status-sync.job.js";
 
 
 //  15 -> 00:00, 00:15, 00:30, 00:45
@@ -35,8 +35,8 @@ export function startPolling() {
 
     const run = async () => {
         try {
-            const count = await runStatusSync();
-            console.log(`Status sync finished (${count} changes)`);
+            const changes = await runStatusSync({ publish: true});
+            console.log(`Status sync executed, changes published:`, changes.length);
         } catch (err) {
             console.error('Status sync failed');
             console.error(err);
