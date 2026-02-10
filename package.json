@@ -16,6 +16,7 @@
   "dependencies": {
     "amqp-connection-manager": "^5.0.0",
     "amqplib": "^0.10.9",
+    "axios": "^1.13.5",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "winston": "^3.19.0"
