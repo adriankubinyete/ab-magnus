@@ -1,0 +1,27 @@
+services:
+  abm-complete:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: abm-complete
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    # internal
+    expose:
+    - "3198"
+
+    # external
+    # ports:
+    #   - "3198:3198"
+
+    networks:
+      - proxy
+
+    command: pnpm start --consumer --producer --http
+
+networks:
+  proxy:
+    external: true
