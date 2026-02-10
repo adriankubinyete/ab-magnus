@@ -146,8 +146,10 @@ export async function getStatusChanges() {
 }
 
 export async function updateMagnusUserStatus(userId, newStatus) {
-  console.log(`[FAKE] Updating Magnus user ${userId} status to ${newStatus}`);
-  // const res = await magnus.updateUserStatus(userId, newStatus);
-  // return res;
-  return null;
+  const stopUpdate = process.env.DEV_MAGNUSBILLING_STOP_UPDATE === 'true';
+  if (stopUpdate) {
+    console.log(`Blocked update of Magnus user ${userId} status to ${newStatus} due to DEV_MAGNUSBILLING_STOP_UPDATE`);
+    return null;
+  };
+  return await magnus.updateUserStatus(userId, newStatus);
 }
