@@ -43,13 +43,13 @@ export async function publishStatusChange(change) {
         occurredAt: new Date().toISOString(),
         data: {
             magnusUserId: change._meta.magnus.userId,
-            magnusUsername: change._meta.magnus.username,
             contractId: change.contract,
             fromStatus: change.from,
             toStatus: change.to,
         },
         _meta: {
             magnusUser: change._meta.magnus.name,
+            magnusUsername: change._meta.magnus.username,
             ixcStatus: change._meta.contract.status_internet,
             source: 'status-change.producer'
         }

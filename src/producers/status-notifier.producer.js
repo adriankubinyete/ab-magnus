@@ -40,6 +40,9 @@ export async function publishStatusNotification({
         },
     };
 
+    console.log("Publishing status notification...");
+    console.log(payload);
+
     await channelWrapper.publish(
         EXCHANGES.STATUS_SYNCED,
         `${PREFIX}notify.delayed`,
