@@ -14,7 +14,7 @@ export async function runStatusSync(options = { publish: true}) {
 
     for (const change of changes) {
         console.log(change);
-        await initStatusChangeProducer
+        await initStatusChangeProducer();
         await publishStatusChange(change);
     }
 

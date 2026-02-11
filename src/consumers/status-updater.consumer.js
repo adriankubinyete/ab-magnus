@@ -27,6 +27,7 @@ export async function startStatusUpdaterConsumer() {
 
                     const {
                         contractId,
+                        magnusUsername,
                         magnusUserId,
                         fromStatus,
                         toStatus,
@@ -45,6 +46,7 @@ export async function startStatusUpdaterConsumer() {
 
                     await publishStatusNotification({
                         name: payload._meta.magnusUser,
+                        username: payload._meta.magnusUsername,
                         contractId,
                         fromStatus,
                         toStatus,

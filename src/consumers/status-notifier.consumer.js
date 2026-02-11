@@ -44,6 +44,7 @@ export async function startStatusNotifierConsumer() {
 
                         const {
                             name,
+                            username,
                             contractId,
                             fromStatus,
                             toStatus,
@@ -57,6 +58,7 @@ export async function startStatusNotifierConsumer() {
                             type: action,
                             Nome: name,
                             Contrato: contractId,
+                            Usuario: username,
                         });
 
                         channel.ack(msg);

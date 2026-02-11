@@ -17,6 +17,7 @@ export async function initStatusNotifierProducer() {
 
 export async function publishStatusNotification({
     name,
+    username,
     contractId,
     fromStatus,
     toStatus,
@@ -30,6 +31,7 @@ export async function publishStatusNotification({
         occurredAt: new Date().toISOString(),
         data: {
             name,
+            username,
             contractId,
             fromStatus,
             toStatus,

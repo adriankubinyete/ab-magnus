@@ -92,6 +92,7 @@ export async function getStatusChanges() {
               },
               magnus: {
                 userId: magnusData.id,
+                username: magnusData.username,
                 userStatus: magnusData.status,
                 name: magnusData.name,
               }
